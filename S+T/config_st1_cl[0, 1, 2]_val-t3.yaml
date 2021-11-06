@@ -1,0 +1,45 @@
+main:
+  prefix: "st1_val-t3"
+  classes: [0, 1, 2]
+  epochs: 100
+  batch_size: 32
+  model: "resnet50"
+  optim: "Adam"
+  load: False
+  shape: [256, 256]
+  val_ratio: 0.2
+  patience: 5
+  stop_cond: "mIoU"
+  cv: 5
+  src_facility: "MF0012"
+  trg_facility: "MF0003"
+  result_dir: "/mnt/secssd/SSDA_Annot_WSI_strage/result_ST1ValT/"
+  jb_dir: "/mnt/secssd/SSDA_Annot_WSI_strage/dataset/"
+  load_pretrained_weight: True
+  pretrained_weight_dir: "/mnt/secssd/SSDA_Annot_WSI_strage/result/checkpoints/"
+  pretrained_weight_names:
+    - "cv0_resnet50_cl[0, 1, 2]_best_val_recall_epoch3.pth"
+    - "cv1_resnet50_cl[0, 1, 2]_best_val_recall_epoch3.pth"
+    - "cv2_resnet50_cl[0, 1, 2]_best_val_recall_epoch5.pth"
+    - "cv3_resnet50_cl[0, 1, 2]_best_val_recall_epoch1.pth"
+    - "cv4_resnet50_cl[0, 1, 2]_best_val_recall_epoch3.pth"
+  trg_selected_wsis:
+    - "03_G144"
+    - "03_G293"
+    - "03_G109-1"
+  trg_valid_wsis:
+    - "03_G170"
+    - "03_G142"
+    - "03_G143"
+  
+dataset:
+  src_imgs_dir: "/mnt/secssd/SSDA_Annot_WSI_strage/mnt2/MF0012/"
+  trg_imgs_dir: "/mnt/secssd/SSDA_Annot_WSI_strage/mnt2/MF0003/"
+
+test:
+  weight_dir: "/mnt/secssd/SSDA_Annot_WSI_strage/result_ST1ValT/checkpoints/"
+  output_dir: "/mnt/secssd/SSDA_Annot_WSI_strage/result_ST1ValT/test/"
+  set: "all"
+  get_miss: False
+  likelihood: False
+
