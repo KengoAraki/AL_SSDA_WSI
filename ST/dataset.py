@@ -40,7 +40,7 @@ class WSIDatasetST1_ValT(WSIDataset):
         self.sub_classes = self.get_sub_classes()
 
         # tarin用のWSIのリストからパッチのパスリストを取得 (source)
-        self.trg_imgs_dirsrc_train_files = self.get_files(self.src_train_wsis, self.src_imgs_dir)
+        self.src_train_files = self.get_files(self.src_train_wsis, self.src_imgs_dir)
 
         # 各WSIのリストからパッチのパスリストを取得 (target)
         self.trg_train_files = self.get_files([self.trg_train_wsi], self.trg_imgs_dir)
@@ -57,15 +57,15 @@ class WSIDatasetST1_ValT(WSIDataset):
 
         self.data_len = len(train_files) + len(valid_files) + len(test_files)
         print(f"[wsi (source)]  train: {len(self.src_train_wsis)}")
-        print(f"[patch (source)] train: {len(self.src_train_files)}")
         print(
             f"[wsi (target)]  train: 1, valid: {len(self.trg_valid_wsis)}, test: {len(self.trg_test_wsis)}"
         )
         print(
-            f"[patch (target)] train: {len(self.trg_train_files)}, valid: {len(self.trg_valid_files)}, test: {len(self.trg_test_files)}"
-        )
-        print(
             f"[wsi (all)]  train: {len(self.src_train_wsis) + 1}, valid: {len(self.trg_valid_wsis)}, test: {len(self.trg_test_wsis)}"
+        )
+        print(f"[patch (source)] train: {len(self.src_train_files)}")
+        print(
+            f"[patch (target)] train: {len(self.trg_train_files)}, valid: {len(self.trg_valid_files)}, test: {len(self.trg_test_files)}"
         )
         print(
             f"[patch (all)] train: {len(train_files)}, valid: {len(self.trg_valid_files)}, test: {len(test_files)}"
@@ -125,3 +125,58 @@ class WSIDatasetST1_ValT(WSIDataset):
 
     def get(self):
         return self.src_train_data, self.trg_train_data, self.valid_data, self.test_data
+
+
+if __name__ == '__main__':
+    import yaml
+    import joblib
+
+    config_path = "./ST/config_st_cl[0, 1, 2]_valt3.yaml"
+
+    with open(config_path) as file:
+        config = yaml.safe_load(file.read())
+
+    input_shape = tuple(config['main']['shape'])
+    transform = {"Resize": True, "HFlip": True, "VFlip": True}
+
+    # WSIのリストを取得 (target)
+    trg_train_wsis = joblib.load(
+        config['main']['jb_dir']
+        + f"{config['main']['trg_facility']}/"
+        + "trg_l_wsi.jb"
+    )
+    trg_valid_wsis = joblib.load(
+        config['main']['jb_dir']
+        + f"{config['main']['trg_facility']}/"
+        + "valid_wsi.jb"
+    )
+    trg_test_wsis = joblib.load(
+        config['main']['jb_dir']
+        + f"{config['main']['trg_facility']}/"
+        + "trg_unl_wsi.jb"
+    )
+
+    # WSIのリストを取得 (source)
+    cv_num = 0
+    src_train_wsis = joblib.load(
+        config['main']['jb_dir']
+        + f"{config['main']['src_facility']}/"
+        + f"cv{cv_num}_"
+        + f"train_{config['main']['src_facility']}_wsi.jb"
+    )
+
+    for trg_selected_wsi in trg_train_wsis:
+        print(f"===== {trg_selected_wsi} =====")
+        dataset = WSIDatasetST1_ValT(
+            trg_train_wsi=trg_selected_wsi,
+            src_train_wsis=src_train_wsis,
+            trg_valid_wsis=trg_valid_wsis,
+            trg_test_wsis=trg_test_wsis,
+            src_imgs_dir=config['dataset']['src_imgs_dir'],
+            trg_imgs_dir=config['dataset']['trg_imgs_dir'],
+            classes=config['main']['classes'],
+            shape=input_shape,
+            transform=transform,
+            balance_domain=False,
+        )
+        print(len(dataset))
