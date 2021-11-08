@@ -1,0 +1,25 @@
+main:
+  prefix: "s"
+  classes: [0, 1, 2]
+  epochs: 100
+  batch_size: 32
+  model: "resnet50"
+  optim: "Adam"
+  shape: [256, 256]
+  patience: 5
+  stop_cond: "mIoU"
+  cv: 5
+  facility: "MF0012"
+  result_dir: "/mnt/secssd/AL_SSDA_WSI_strage/s_result/"
+  jb_dir: "/mnt/secssd/AL_SSDA_WSI_strage/dataset/"
+
+dataset:
+  imgs_dir: "/mnt/secssd/SSDA_Annot_WSI_strage/mnt2/MF0012/"
+
+test:
+  weight_dir: "/mnt/secssd/AL_SSDA_WSI_strage/s_result/checkpoints/"
+  output_dir: "/mnt/secssd/AL_SSDA_WSI_strage/s_result/test/"
+  set: "all"
+  get_miss: False
+  likelihood: False
+
