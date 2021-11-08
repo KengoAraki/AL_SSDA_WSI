@@ -169,8 +169,7 @@ class WSIDataset(object):
         self.test_data = WSI(test_files, self.classes, self.shape, test_transform)
 
     def __len__(self):
-        # return len(self.file_list)
-        return len(self.data_len)
+        return self.data_len
 
     def get_sub_classes(self):
         # classesからsub-classを取得
