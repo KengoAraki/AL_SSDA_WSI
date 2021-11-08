@@ -6,11 +6,12 @@ import numpy as np
 from PIL import Image
 import cv2
 from scipy import stats
+from natsort import natsorted
 
 
 class OpenSlideWSI(openslide.OpenSlide):
 
-    def __init__(self, filename, bg_mask_dir=None, semantic_mask_dir=None, dfb_dir=None):
+    def __init__(self, filename, bg_mask_dir=None, semantic_mask_dir=None):
         super().__init__(filename)
         p_filename = pathlib.Path(filename)
         self.wsi_name = str(p_filename.stem)
@@ -24,10 +25,6 @@ class OpenSlideWSI(openslide.OpenSlide):
             self.semantic_mask_dir = semantic_mask_dir
             self.filename_semantic_mask = self.semantic_mask_dir \
                 + self.wsi_name + "_overlaid.tif"
-        if dfb_dir is not None:
-            self.dfb_dir = dfb_dir
-            self.filename_dfb = self.dfb_dir \
-                + self.wsi_name + "_dfb.png"
 
     # 条件を満たさなければNoneを返す
     def _get_output_dir(self, s_p, output_main_dir, obj_name, th=1):
@@ -76,6 +73,7 @@ class OpenSlideWSI(openslide.OpenSlide):
 
         return bb_list
 
+    # FIXME: Fix bug when level is setted other than 0
     # split a bounding-box area of wsi to patch images
     def bb_to_patch(
         self,
@@ -88,21 +86,38 @@ class OpenSlideWSI(openslide.OpenSlide):
         contours_th=0.5,
     ):  # size=(width, height)
         assert isinstance(bb, dict), "bb(bounding-box) must be dict type"
-        # bounding_box
-        bx, by, bw, bh = bb['x'], bb['y'], bb['w'], bb['h']
         obj_name = bb['name']
 
-        # bbをlevel[0]用に変換（bbはbg_mask_level05における座標のため）
-        bx_wsi = bb['x'] * (2 ** (default_level - level))
-        by_wsi = bb['y'] * (2 ** (default_level - level))
-        bw_wsi = bb['w'] * (2 ** (default_level - level))
-        bh_wsi = bb['h'] * (2 ** (default_level - level))
+        # FIXME: fix here! === #
+        # # bbをlevel用に変換（bbはbg_mask_level05における座標のため）
+        # bx_wsi = bb['x'] * (2 ** (default_level - level))  # bounding-boxの左上x座標(level)
+        # by_wsi = bb['y'] * (2 ** (default_level - level))  # bounding-boxの左上y座標(level)
+        # bw_wsi = bb['w'] * (2 ** (default_level - level))  # bounding-boxの横幅(level)
+        # bh_wsi = bb['h'] * (2 ** (default_level - level))  # bounding-boxの縦幅(level)
 
-        width = self.level_dimensions[level][0]
-        height = self.level_dimensions[level][1]
+        # width = self.level_dimensions[level][0]  # WSIの横幅(level)
+        # height = self.level_dimensions[level][1]  # WSIの縦幅(level)
+        # row_max = int((bw_wsi - size[0]) / stride + 1)
+        # column_max = int((bh_wsi - size[1]) / stride + 1)
+
+        # # 細胞領域のマスク画像，背景領域のマスク画像の１ピクセルが特定のレベルのWSIの何ピクセルに相当するか計算
+        # stride_rate = stride / 2 ** (default_level - level)
+        # width_rate = size[0] / 2 ** (default_level - level)
+        # height_rate = size[1] / 2 ** (default_level - level)
+        # ===================== #
+
+        # bbのx, yをlevel0用に変換（bbはbg_mask_level05における座標のため）
+        bx_wsi_0 = bb['x'] * (2 ** default_level)  # bounding-boxの左上x座標(level0)
+        by_wsi_0 = bb['y'] * (2 ** default_level) # bounding-boxの左上y座標(level0)
+
+        # bbのw, hを特定のlevel用に変換
+        bw_wsi = bb['w'] * (2 ** (default_level - level))  # bounding-boxの横幅(level)
+        bh_wsi = bb['h'] * (2 ** (default_level - level))  # bounding-boxの縦幅(level)
+
         row_max = int((bw_wsi - size[0]) / stride + 1)
         column_max = int((bh_wsi - size[1]) / stride + 1)
 
+        # 細胞領域のマスク画像，背景領域のマスク画像の１ピクセルが特定のレベルのWSIの何ピクセルに相当するか計算
         stride_rate = stride / 2 ** (default_level - level)
         width_rate = size[0] / 2 ** (default_level - level)
         height_rate = size[1] / 2 ** (default_level - level)
@@ -116,11 +131,13 @@ class OpenSlideWSI(openslide.OpenSlide):
         cnt = 0
         for column in range(column_max):
             for row in range(row_max):
-                i = int(bx_wsi + (row * stride * (2 ** level)))
-                j = int(by_wsi + (column * stride * (2 ** level)))
+                # i = int(bx_wsi + (row * stride * (2 ** level)))
+                # j = int(by_wsi + (column * stride * (2 ** level)))
+                i = int(bx_wsi_0 + (row * stride * (2 ** level)))
+                j = int(by_wsi_0 + (column * stride * (2 ** level)))
 
-                mask_base_idx = {'row': int(bx + (row * stride_rate)),
-                                 'col': int(by + (column * stride_rate))}
+                mask_base_idx = {'row': int(bb['x'] + (row * stride_rate)),
+                                 'col': int(bb['y'] + (column * stride_rate))}
 
                 # width_rate×height_rateの領域(背景領域のマスク画像)の画素値が0の画素数で比較
                 if (
@@ -128,7 +145,7 @@ class OpenSlideWSI(openslide.OpenSlide):
                         np.where(
                             bg_mask_np[
                                 mask_base_idx['col']:int(mask_base_idx['col'] + height_rate),
-                                mask_base_idx['row']: int(mask_base_idx['row'] + width_rate),
+                                mask_base_idx['row']:int(mask_base_idx['row'] + width_rate),
                             ]
                             == 0
                         )[0]
@@ -158,62 +175,13 @@ class OpenSlideWSI(openslide.OpenSlide):
                             s_p, output_main_dir, obj_name)
 
                         if output_dir is not None:
-                            # self.read_region((i, j), level, size).save(
-                            #     output_dir
-                            #     + str(level)
-                            #     + "_"
-                            #     + str(cnt).zfill(10)
-                            #     + ".png"
-                            # )
-
-                            # FIXME: rewrite dfb crop
-                            if self.filename_dfb is not None:
-                                dfb = Image.open(self.filename_dfb)
-                                output_dfb_dir = output_dir.replace("/mnt2/", "/mnt3/")
-                                os.makedirs(output_dfb_dir) if os.path.isdir(output_dfb_dir) is False else None
-                                assert os.path.exists(output_dfb_dir), f"{output_dfb_dir} does not exists"
-                                dfb.crop(
-                                    (
-                                        mask_base_idx['row'],
-                                        mask_base_idx['col'],
-                                        int(mask_base_idx['row'] + width_rate),
-                                        int(mask_base_idx['col'] + height_rate),
-                                    )
-                                ).resize((size[0], size[1])).save(
-                                    output_dfb_dir
-                                    + str(level)
-                                    + "_"
-                                    + str(cnt).zfill(10)
-                                    + ".png"
-                                )
-
-                                # --- output mean of dfb patch --- #
-                                # dfb_num = np.mean(
-                                #     np.asarray(
-                                #         dfb.crop(
-                                #             (
-                                #                 mask_base_idx['row'],
-                                #                 mask_base_idx['col'],
-                                #                 int(mask_base_idx['row'] + width_rate),
-                                #                 int(mask_base_idx['col'] + height_rate),
-                                #             )
-                                #         )
-                                #     )
-                                # ).astype(np.uint8)
-
-                                # dfb_patch = Image.fromarray(
-                                #     np.full((size[0], size[1]), dfb_num)
-                                # )
-
-                                # dfb_patch.save(
-                                #     output_dfb_dir
-                                #     + str(level)
-                                #     + "_"
-                                #     + str(cnt).zfill(10)
-                                #     + ".png"
-                                # )
-                                # -------------------------------- #
-
+                            self.read_region((i, j), level, size).save(
+                                output_dir
+                                + str(level)
+                                + "_"
+                                + str(cnt).zfill(10)
+                                + ".png"
+                            )
                             cnt = cnt + 1
 
     # split a full-size image to patch images
@@ -253,55 +221,6 @@ class OpenSlideWSI(openslide.OpenSlide):
                     + str(cnt).zfill(10)
                     + ".png"
                 )
-
-                if self.filename_dfb is not None:
-                    dfb = Image.open(self.filename_dfb)
-                    # FIXME: 定性評価画像用のpatchのdirであることに注意！
-                    output_dfb_dir = output_dir.replace("/mnt4(ForPredmap)/", "/mnt4(ForPredmap_DFB_Mean)/")
-                    os.makedirs(output_dfb_dir) if os.path.isdir(output_dfb_dir) is False else None
-                    assert os.path.exists(output_dfb_dir), f"{output_dfb_dir} does not exists"
-
-                    # dfb.crop(
-                    #     (
-                    #         row * stride_rate,
-                    #         column * stride_rate,
-                    #         row * stride_rate + width_rate,
-                    #         column * stride_rate + height_rate,
-                    #     )
-                    # ).resize((size[0], size[1])).save(
-                    #     output_dfb_dir
-                    #     + str(level)
-                    #     + "_"
-                    #     + str(cnt).zfill(10)
-                    #     + ".png"
-                    # )
-
-                    # --- output mean of dfb patch --- #
-                    dfb_num = np.mean(
-                        np.asarray(
-                            dfb.crop(
-                                (
-                                    row * stride_rate,
-                                    column * stride_rate,
-                                    row * stride_rate + width_rate,
-                                    column * stride_rate + height_rate,
-                                )
-                            )
-                        )
-                    ).astype(np.uint8)
-
-                    dfb_patch = Image.fromarray(
-                        np.full((size[0], size[1]), dfb_num)
-                    )
-
-                    dfb_patch.save(
-                        output_dfb_dir
-                        + str(level)
-                        + "_"
-                        + str(cnt).zfill(10)
-                        + ".png"
-                    )
-                    # -------------------------------- #
 
                 cnt = cnt + 1
         return cnt
@@ -464,36 +383,34 @@ class OpenSlideWSI(openslide.OpenSlide):
 
 
 def main():
-    parent_dir = "/mnt/ssdsub1/DFBConv_strage/mnt1/MF0012/"
+    parent_dir = "/mnt/ssdwdc/chemotherapy_strage/mnt1/"
     p_parent_dir = pathlib.Path(parent_dir)
-    output_main_dir = parent_dir.replace("mnt1/", "mnt2/")
+    output_main_dir = parent_dir.replace("mnt1/", "mnt2_LEV1/")
 
     # ------------------ #
     DEFAULT_LEVEL = 5
-    LEVEL = 0
+    LEVEL = 1
     SIZE = (256, 256)
     STRIDE = 256
     CONTOURS_TH = 1
-    CLASSES = [0, 1, 2, 3, 4]
+    CLASSES = [0, 1, 2]
     # ------------------ #
 
-    wsi_list = sorted([wsi_path for wsi_path in (p_parent_dir / "origin/").iterdir()])
+    wsi_list = natsorted([wsi_path for wsi_path in (p_parent_dir / "origin/").glob("*.ndpi")])
 
     for wsi_path in wsi_list:
         wsi_path = str(wsi_path)
         bg_mask_dir = parent_dir + "mask_bg/"
-        test_dir = parent_dir + "test/"
         semantic_mask_dir = parent_dir + \
             f"mask_cancergrade_gray/overlaid_{CLASSES}/"
-        dfb_dir = parent_dir + "dfb/"
 
         wsi = OpenSlideWSI(
             wsi_path,
             bg_mask_dir=bg_mask_dir,
-            semantic_mask_dir=semantic_mask_dir,
-            dfb_dir=dfb_dir)
+            semantic_mask_dir=semantic_mask_dir)
 
         print("==== {} ====".format(wsi.wsi_name))
+
         bb_list = wsi._getBoundingBox()
 
         for bb in bb_list:
@@ -512,9 +429,9 @@ def main():
 
 # 予測画像用のパッチ切り取り
 def main_for_predmap():
-    parent_dir = "/mnt/ssdsub1/DFBConv_strage/mnt1/MF0012/"
+    parent_dir = "/mnt/ssdwdc/chemotherapy_strage/mnt1/"
     p_parent_dir = pathlib.Path(parent_dir)
-    output_main_dir = parent_dir.replace("mnt1/", "mnt4(ForPredmap)/")
+    output_main_dir = parent_dir.replace("mnt1/", "mnt3/")
 
     # ------------------ #
     DEFAULT_LEVEL = 5
@@ -523,22 +440,26 @@ def main_for_predmap():
     STRIDE = 256
     # ------------------ #
 
-    wsi_list = sorted([wsi_path for wsi_path in (p_parent_dir / "origin/").iterdir()])
+    wsi_list = natsorted([wsi_path for wsi_path in (p_parent_dir / "origin/").glob("*.ndpi")])
+    skip_list = ["H19-12183_8", "H19-12183_9", "H19-12183_10", "H19-12183_11", "H19-12183_13", "H19-12183_14"]
 
     for wsi_path in wsi_list:
         wsi_path = str(wsi_path)
-        dfb_dir = parent_dir + "dfb/"
+
+        tmp_skip_list = [s for s in skip_list if s in wsi_path]
+        if len(tmp_skip_list) > 0:
+            print(f"skip: {wsi_path}")
+            continue
 
         wsi = OpenSlideWSI(
             wsi_path,
             bg_mask_dir=None,
-            semantic_mask_dir=None,
-            dfb_dir=dfb_dir)
+            semantic_mask_dir=None)
 
         print("==== {} ====".format(wsi.wsi_name))
         wsi.image_to_patch(DEFAULT_LEVEL, LEVEL, SIZE, STRIDE, output_main_dir, wsi.wsi_name)
 
 
 if __name__ == "__main__":
-    # main()
-    main_for_predmap()
+    main()
+    # main_for_predmap()
