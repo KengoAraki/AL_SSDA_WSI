@@ -1,5 +1,5 @@
 main:
-  prefix: "st1_val-t3"
+  prefix: "st_val-t3"
   classes: [0, 1, 2]
   epochs: 100
   batch_size: 32
