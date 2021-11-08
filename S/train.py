@@ -12,10 +12,10 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-from ST.dataset import WSIDataset
-from ST.eval import eval_net, eval_metrics
-from ST.util import fix_seed, ImbalancedDatasetSampler, select_optim
-from ST.model import build_model
+from S.dataset import WSIDataset
+from S.eval import eval_net, eval_metrics
+from S.util import fix_seed, ImbalancedDatasetSampler, select_optim
+from S.model import build_model
 
 
 def train_net(
