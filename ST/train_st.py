@@ -91,7 +91,7 @@ def train_net(
             total=n_train, desc=f"Epoch {epoch + 1}/{epochs}", unit="img"
         ) as pbar:
             # 短いdataloaderに合わせる
-            for src_batch, trg_batch in enumerate(src_train_loader, trg_train_loader):
+            for src_batch, trg_batch in zip(src_train_loader, trg_train_loader):
                 src_imgs, trg_imgs = src_batch["image"], trg_batch["image"]
                 src_labels, trg_labels = src_batch["label"], trg_batch["label"]
 
