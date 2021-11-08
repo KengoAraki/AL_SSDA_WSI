@@ -12,10 +12,10 @@ import torch.nn as nn
 import matplotlib.pyplot as plt
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-from src_s_t1.dataset import WSI, get_files
-from src_s_t1.eval import eval_net_test, plot_confusion_matrix, eval_metrics
-from src_s_t1.util import fix_seed
-from src_s_t1.model import build_model
+from S.dataset import WSI, get_files
+from S.eval import eval_net_test, plot_confusion_matrix, eval_metrics
+from S.util import fix_seed
+from S.model import build_model
 
 
 def main_src():

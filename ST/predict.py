@@ -13,9 +13,9 @@ from natsort import natsorted
 from PIL import Image
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-from src_s_t1.dataset import WSI
-from src_s_t1.util import fix_seed
-from src_s_t1.model import build_model
+from S.dataset import WSI
+from S.util import fix_seed
+from S.model import build_model
 from preprocess.openslide_wsi import OpenSlideWSI
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
