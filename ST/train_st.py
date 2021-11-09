@@ -235,12 +235,12 @@ def main():
         + "trg_l_wsi.jb"
     )
     trg_valid_wsis = joblib.load(
-        config['main']['jb_dir']
+        config['dataset']['jb_dir']
         + f"{config['main']['trg_facility']}/"
         + "valid_wsi.jb"
     )
     trg_test_wsis = joblib.load(
-        config['main']['jb_dir']
+        config['dataset']['jb_dir']
         + f"{config['main']['trg_facility']}/"
         + "trg_unl_wsi.jb"
     )
@@ -274,7 +274,7 @@ def main():
 
             # WSIのリストを取得 (source)
             src_train_wsis = joblib.load(
-                config['main']['jb_dir']
+                config['dataset']['jb_dir']
                 + f"{config['main']['src_facility']}/"
                 + f"cv{cv_num}_"
                 + f"train_{config['main']['src_facility']}_wsi.jb"

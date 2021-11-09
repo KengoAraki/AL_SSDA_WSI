@@ -64,7 +64,7 @@ def main_src():
 
         # # --- sourceデータ --- #
         # wsis = joblib.load(
-        #     config["main"]["jb_dir"]
+        #     config['dataset']['jb_dir']
         #     + f"{config['main']['src_facility']}/"
         #     + f"cv{cv_num}_"
         #     + f"{config['test']['set']}_"
@@ -73,19 +73,19 @@ def main_src():
 
         # --- tragetデータ --- #
         wsis = joblib.load(
-            config["main"]["jb_dir"]
+            config['dataset']['jb_dir']
             + f"{config['main']['trg_facility']}/"
             + "cv0_train_"
             + f"{config['main']['trg_facility']}_wsi.jb"
         )
         wsis += joblib.load(
-            config["main"]["jb_dir"]
+            config['dataset']['jb_dir']
             + f"{config['main']['trg_facility']}/"
             + "cv0_valid_"
             + f"{config['main']['trg_facility']}_wsi.jb"
         )
         wsis += joblib.load(
-            config["main"]["jb_dir"]
+            config['dataset']['jb_dir']
             + f"{config['main']['trg_facility']}/"
             + "cv0_test_"
             + f"{config['main']['trg_facility']}_wsi.jb"
@@ -237,19 +237,19 @@ def main_trg():
 
             # --- traget用 --- #
             wsis = joblib.load(
-                config["main"]["jb_dir"]
+                config['dataset']['jb_dir']
                 + f"{config['main']['trg_facility']}/"
                 + "cv0_train_"
                 + f"{config['main']['trg_facility']}_wsi.jb"
             )
             wsis += joblib.load(
-                config["main"]["jb_dir"]
+                config['dataset']['jb_dir']
                 + f"{config['main']['trg_facility']}/"
                 + "cv0_valid_"
                 + f"{config['main']['trg_facility']}_wsi.jb"
             )
             wsis += joblib.load(
-                config["main"]["jb_dir"]
+                config['dataset']['jb_dir']
                 + f"{config['main']['trg_facility']}/"
                 + "cv0_test_"
                 + f"{config['main']['trg_facility']}_wsi.jb"

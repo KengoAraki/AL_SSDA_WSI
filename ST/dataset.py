@@ -141,17 +141,17 @@ if __name__ == '__main__':
 
     # WSIのリストを取得 (target)
     trg_train_wsis = joblib.load(
-        config['main']['jb_dir']
+        config['dataset']['jb_dir']
         + f"{config['main']['trg_facility']}/"
         + "trg_l_wsi.jb"
     )
     trg_valid_wsis = joblib.load(
-        config['main']['jb_dir']
+        config['dataset']['jb_dir']
         + f"{config['main']['trg_facility']}/"
         + "valid_wsi.jb"
     )
     trg_test_wsis = joblib.load(
-        config['main']['jb_dir']
+        config['dataset']['jb_dir']
         + f"{config['main']['trg_facility']}/"
         + "trg_unl_wsi.jb"
     )
@@ -159,7 +159,7 @@ if __name__ == '__main__':
     # WSIのリストを取得 (source)
     cv_num = 0
     src_train_wsis = joblib.load(
-        config['main']['jb_dir']
+        config['dataset']['jb_dir']
         + f"{config['main']['src_facility']}/"
         + f"cv{cv_num}_"
         + f"train_{config['main']['src_facility']}_wsi.jb"

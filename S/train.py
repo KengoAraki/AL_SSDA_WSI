@@ -202,7 +202,8 @@ def early_stop(val, epoch, best_model_info, patience=5, mode="max"):
 # sourceのみで学習
 def main():
     fix_seed(0)
-    config_path = "./S/config_s_cl[0, 1, 2].yaml"
+    config_path = "../S/config_s_cl[0, 1, 2].yaml"
+    # config_path = "./S/config_s_cl[0, 1, 2].yaml"  # For debug
 
     with open(config_path) as file:
         config = yaml.safe_load(file.read())
@@ -234,19 +235,19 @@ def main():
 
         # WSIのリストを取得 (source)
         train_wsis = joblib.load(
-            config['main']['jb_dir']
+            config['dataset']['jb_dir']
             + f"{config['main']['facility']}/"
             + f"cv{cv_num}_"
             + f"train_{config['main']['facility']}_wsi.jb"
         )
         valid_wsis = joblib.load(
-            config['main']['jb_dir']
+            config['dataset']['jb_dir']
             + f"{config['main']['facility']}/"
             + f"cv{cv_num}_"
             + f"valid_{config['main']['facility']}_wsi.jb"
         )
         test_wsis = joblib.load(
-            config['main']['jb_dir']
+            config['dataset']['jb_dir']
             + f"{config['main']['facility']}/"
             + f"cv{cv_num}_"
             + f"test_{config['main']['facility']}_wsi.jb"

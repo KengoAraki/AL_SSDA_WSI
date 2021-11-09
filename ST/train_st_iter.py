@@ -227,17 +227,17 @@ def main_finetune():
 
     # WSIのリストを取得 (target)
     trg_train_wsis = joblib.load(
-        config["main"]["trg_jb_dir"]
+        config['dataset']['trg_jb_dir']
         + f"{config['main']['trg_facility']}/"
         + "trg_l_wsi.jb"
     )
     trg_valid_wsis = joblib.load(
-        config["main"]["trg_jb_dir"]
+        config['dataset']['trg_jb_dir']
         + f"{config['main']['trg_facility']}/"
         + "valid_wsi.jb"
     )
     trg_test_wsis = joblib.load(
-        config["main"]["trg_jb_dir"]
+        config['dataset']['trg_jb_dir']
         + f"{config['main']['trg_facility']}/"
         + "trg_unl_wsi.jb"
     )
