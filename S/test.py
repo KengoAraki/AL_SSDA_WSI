@@ -20,7 +20,6 @@ def test_net(
     net,
     files: list,
     classes: list,
-    test_facility: str,
     test_set: str,
     output_dir: str,
     project: str = "test_net",
@@ -77,7 +76,7 @@ def test_net(
     cm_plt.savefig(
         output_dir
         + project
-        + f"_{test_set}-{test_facility}_nn-confmatrix.png"
+        + "_nn-confmatrix.png"
     )
     plt.clf()
     plt.close()
@@ -87,7 +86,7 @@ def test_net(
     cm_plt.savefig(
         output_dir
         + project
-        + f"_{test_set}_{test_facility}_confmatrix.png"
+        + "_confmatrix.png"
     )
     plt.clf()
     plt.close()
@@ -129,6 +128,10 @@ def main_src(test_set: str = "test"):
             + str(config['main']['batch_size'])
             + "_shape"
             + str(config['main']['shape'])
+            + "_"
+            + test_set
+            + "-"
+            + config['test']['src_facility']
         )
         logging.info(f"{project}\n")
 
@@ -157,7 +160,6 @@ def main_src(test_set: str = "test"):
             net=net,
             files=files,
             classes=config['main']['classes'],
-            test_facility=config['test']['src_facility'],
             test_set=test_set,
             output_dir=config['test']['output_dir'],
             project=project,
@@ -203,6 +205,10 @@ def main_trg(test_set: str = "trg_unl"):
             + str(config['main']['batch_size'])
             + "_shape"
             + str(config['main']['shape'])
+            + "_"
+            + test_set
+            + "-"
+            + config['test']['trg_facility']
         )
         logging.info(f"{project}\n")
 
@@ -229,7 +235,6 @@ def main_trg(test_set: str = "trg_unl"):
             net=net,
             files=files,
             classes=config['main']['classes'],
-            test_facility=config['test']['trg_facility'],
             test_set=test_set,
             output_dir=config['test']['output_dir'],
             project=project,
