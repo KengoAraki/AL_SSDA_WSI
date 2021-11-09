@@ -92,14 +92,12 @@ def test_net(
     plt.close()
 
 
-def main_src(test_set: str = "test"):
+def main_src(config_path: str, test_set: str = "test"):
     """
     sourceのみで訓練されたモデルを使用
     source dataに対してテスト
     """
     fix_seed(0)
-    config_path = "../S/config_s_cl[0, 1, 2].yaml"
-    # config_path = "./S/config_s_cl[0, 1, 2].yaml"  # For debug
 
     with open(config_path) as file:
         config = yaml.safe_load(file.read())
@@ -169,14 +167,12 @@ def main_src(test_set: str = "test"):
         )
 
 
-def main_trg(test_set: str = "trg_unl"):
+def main_trg(config_path: str, test_set: str = "trg_unl"):
     """
     sourceのみで訓練されたモデルを使用
     target dataに対してテスト
     """
     fix_seed(0)
-    config_path = "../S/config_s_cl[0, 1, 2].yaml"
-    # config_path = "./S/config_s_cl[0, 1, 2].yaml"  # For debug
 
     with open(config_path) as file:
         config = yaml.safe_load(file.read())
@@ -247,5 +243,9 @@ def main_trg(test_set: str = "trg_unl"):
 if __name__ == "__main__":
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-    main_trg(test_set="trg_unl")
-    main_src(test_set="test")
+
+    config_path = "../S/config_s_cl[0, 1, 2].yaml"
+    # config_path = "./S/config_s_cl[0, 1, 2].yaml"  # For debug
+
+    main_trg(config_path=config_path, test_set="trg_unl")
+    main_src(config_path=config_path, test_set="test")
