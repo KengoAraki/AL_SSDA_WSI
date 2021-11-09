@@ -169,7 +169,7 @@ def plot_confusion_matrix(cm, class_names, normalize=True):
     """
 
     figure = plt.figure(figsize=(8, 8))
-    plt.rcParams["font.size"] = 18
+    plt.rcParams["font.size"] = 20
 
     # Normalize the confusion matrix.
     if normalize:
