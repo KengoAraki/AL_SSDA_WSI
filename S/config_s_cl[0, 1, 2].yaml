@@ -11,15 +11,24 @@ main:
   cv: 5
   facility: "MF0012"
   result_dir: "/mnt/secssd/AL_SSDA_WSI_strage/s_result/"
-  jb_dir: "/mnt/secssd/AL_SSDA_WSI_strage/dataset/"
 
 dataset:
   imgs_dir: "/mnt/secssd/SSDA_Annot_WSI_strage/mnt2/MF0012/"
+  jb_dir: "/mnt/secssd/AL_SSDA_WSI_strage/dataset/"
+
 
 test:
-  weight_dir: "/mnt/secssd/AL_SSDA_WSI_strage/s_result/checkpoints/"
   output_dir: "/mnt/secssd/AL_SSDA_WSI_strage/s_result/test/"
-  set: "all"
+  weight_dir: "/mnt/secssd/AL_SSDA_WSI_strage/s_result/checkpoints/s_MF0012_[0, 1, 2]/"
+  weight_names:
+    - "cv0_epoch6.pth"
+    - "cv1_epoch6.pth"
+    - "cv2_epoch8.pth"
+    - "cv3_epoch5.pth"
+    - "cv4_epoch9.pth"
   get_miss: False
   likelihood: False
-
+  src_facility: "MF0012"
+  src_imgs_dir: "/mnt/secssd/SSDA_Annot_WSI_strage/mnt2/MF0012/"
+  trg_facility: "MF0003"
+  trg_imgs_dir: "/mnt/secssd/SSDA_Annot_WSI_strage/mnt2/MF0003/"
