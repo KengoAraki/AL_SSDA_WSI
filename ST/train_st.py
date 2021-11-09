@@ -216,7 +216,8 @@ def early_stop(val, epoch, best_model_info, patience=5, mode="max"):
 # source + 1枚のtargetで学習
 def main():
     fix_seed(0)
-    config_path = "../ST/config_st_cl[0, 1, 2]_valt3.yaml"
+    # config_path = "../ST/config_st_cl[0, 1, 2]_valt3.yaml"
+    config_path = "../ST/config_st_cl[0, 1, 2]_valt3_pretrained.yaml"
 
     with open(config_path) as file:
         config = yaml.safe_load(file.read())
@@ -230,7 +231,7 @@ def main():
 
     # WSIのリストを取得 (target)
     trg_train_wsis = joblib.load(
-        config['main']['jb_dir']
+        config['dataset']['jb_dir']
         + f"{config['main']['trg_facility']}/"
         + "trg_l_wsi.jb"
     )
@@ -251,7 +252,7 @@ def main():
             writer = SummaryWriter(
                 log_dir=(
                     (
-                        f"{config['main']['result_dir']}logs/st1_valt3_{config['main']['src_facility']}_"
+                        f"{config['main']['result_dir']}logs/{config['main']['prefix']}_{config['main']['src_facility']}_"
                         + f"{trg_selected_wsi}_{config['main']['model']}_batch{config['main']['batch_size']}_"
                         + f"shape{config['main']['shape']}_cl{config['main']['classes']}_cv{cv_num}"
                     )
@@ -319,7 +320,7 @@ def main():
 
             checkpoint_dir = (
                 f"{config['main']['result_dir']}checkpoints/"
-                + f"st1_valt3_{config['main']['src_facility']}_{trg_selected_wsi}_{config['main']['classes']}/")
+                + f"{config['main']['prefix']}_{config['main']['src_facility']}_{trg_selected_wsi}_{config['main']['classes']}/")
             try:
                 os.mkdir(checkpoint_dir)
                 logging.info("Created checkpoint directory")
@@ -356,6 +357,6 @@ def main():
 
 if __name__ == "__main__":
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
     main()

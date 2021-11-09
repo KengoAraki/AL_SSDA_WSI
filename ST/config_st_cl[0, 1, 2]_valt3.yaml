@@ -1,5 +1,5 @@
 main:
-  prefix: "st_valt3"
+  prefix: "st1_valt3"
   classes: [0, 1, 2]
   epochs: 100
   batch_size: 32
@@ -12,16 +12,7 @@ main:
   cv: 5
   src_facility: "MF0012"
   trg_facility: "MF0003"
-  jb_dir: "/mnt/secssd/AL_SSDA_WSI_strage/dataset/"
-  # load_pretrained_weight: True
   load_pretrained_weight: False
-  pretrained_weight_dir: "/mnt/secssd/SSDA_Annot_WSI_strage/s_result/checkpoints/"
-  pretrained_weight_names:
-    - "cv0_resnet50_cl[0, 1, 2]_best_val_mIoU_epoch3.pth"
-    - "cv1_resnet50_cl[0, 1, 2]_best_val_mIoU_epoch3.pth"
-    - "cv2_resnet50_cl[0, 1, 2]_best_val_mIoU_epoch5.pth"
-    - "cv3_resnet50_cl[0, 1, 2]_best_val_mIoU_epoch1.pth"
-    - "cv4_resnet50_cl[0, 1, 2]_best_val_mIoU_epoch3.pth"
   # trg_selected_wsis:
   #   - "03_G144"
   #   - "03_G293"
@@ -33,13 +24,13 @@ main:
   result_dir: "/mnt/secssd/AL_SSDA_WSI_strage/st_result/"
   
 dataset:
+  jb_dir: "/mnt/secssd/AL_SSDA_WSI_strage/dataset/"
   src_imgs_dir: "/mnt/secssd/SSDA_Annot_WSI_strage/mnt2/MF0012/"
   trg_imgs_dir: "/mnt/secssd/SSDA_Annot_WSI_strage/mnt2/MF0003/"
 
 test:
   weight_dir: "/mnt/secssd/AL_SSDA_WSI_strage/st_result/checkpoints/"
   output_dir: "/mnt/secssd/AL_SSDA_WSI_strage/st_result/checkpoints/"
-  set: "all"
   get_miss: False
   likelihood: False
 
