@@ -36,7 +36,8 @@ def train_net(
     cv_num=0,
 ):
 
-    n_train = len(src_train_data) + len(trg_train_data)
+    n_train = min(len(src_train_data), len(trg_train_data)) * 2
+    logging.info(f"samples num in each iteration: {n_train}")
 
     src_train_loader = DataLoader(
         src_train_data,
