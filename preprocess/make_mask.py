@@ -49,7 +49,7 @@ def num_to_color(num):
 
 def update_canvases(image_mask, canvas, canvas_gray, color, i, th=250):
     mask = cv2.imread(image_mask, cv2.IMREAD_GRAYSCALE)
-    canvas[mask > th] = 6
+    canvas[mask > th] = color
     canvas_gray[mask > th] = i
     return canvas, canvas_gray
 
@@ -99,7 +99,7 @@ def overlaid_mask_image(PATH_WORK, CLASSES, IS_NOLABEL_NORMAL=False, th=250):
                     # nolabelの領域をnormalとして扱う場合
                     if (IS_NOLABEL_NORMAL and (SUB_CLASS == 0)):
                         image_mask = extract_mask_path(
-                            image_masks, keyword=f"nolabel")
+                            image_masks, keyword="nolabel")
                         canvas, canvas_gray = \
                             update_canvases(image_mask, canvas, canvas_gray, color, i, th=th)
             else:
@@ -108,11 +108,11 @@ def overlaid_mask_image(PATH_WORK, CLASSES, IS_NOLABEL_NORMAL=False, th=250):
                 color = num_to_color(cls)
                 canvas, canvas_gray = \
                     update_canvases(image_mask, canvas, canvas_gray, color, i, th=th)
-                
+
                 # nolabelの領域をnormalとして扱う場合
                 if (IS_NOLABEL_NORMAL and (cls == 0)):
                     image_mask = extract_mask_path(
-                        image_masks, keyword=f"nolabel")
+                        image_masks, keyword="nolabel")
                     canvas, canvas_gray = \
                         update_canvases(image_mask, canvas, canvas_gray, color, i, th=th)
 
@@ -137,7 +137,7 @@ def overlaid_mask_image(PATH_WORK, CLASSES, IS_NOLABEL_NORMAL=False, th=250):
 if __name__ == "__main__":
     PATH_WORK = "/mnt/secssd/SSDA_Annot_WSI_strage/mnt1/MF0003/"
 
-    CLASSES = [0, 1, 2, 3, 4]
-    IS_NOLABEL_NORMAL = False
+    CLASSES = [0, 1, 2]
+    IS_NOLABEL_NORMAL = True
 
     overlaid_mask_image(PATH_WORK, CLASSES, IS_NOLABEL_NORMAL, th=250)
