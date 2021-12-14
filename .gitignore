@@ -1,3 +1,7 @@
 S/__pycache__/
 ST/__pycache__/
 preprocess/__pycache__/
+
+ipynb/input_predmap/
+ipynb/output/
+ipynb/output_predmap/
