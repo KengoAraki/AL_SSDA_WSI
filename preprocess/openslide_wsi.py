@@ -429,7 +429,7 @@ def main():
 
 # 予測画像用のパッチ切り取り
 def main_for_predmap():
-    parent_dir = "/mnt/ssdwdc/chemotherapy_strage/mnt1/"
+    parent_dir = "/mnt/secssd/SSDA_Annot_WSI_strage/mnt1/MF0003/"
     p_parent_dir = pathlib.Path(parent_dir)
     output_main_dir = parent_dir.replace("mnt1/", "mnt3/")
 
@@ -441,15 +441,15 @@ def main_for_predmap():
     # ------------------ #
 
     wsi_list = natsorted([wsi_path for wsi_path in (p_parent_dir / "origin/").glob("*.ndpi")])
-    skip_list = ["H19-12183_8", "H19-12183_9", "H19-12183_10", "H19-12183_11", "H19-12183_13", "H19-12183_14"]
+    # skip_list = []
 
     for wsi_path in wsi_list:
         wsi_path = str(wsi_path)
 
-        tmp_skip_list = [s for s in skip_list if s in wsi_path]
-        if len(tmp_skip_list) > 0:
-            print(f"skip: {wsi_path}")
-            continue
+        # tmp_skip_list = [s for s in skip_list if s in wsi_path]
+        # if len(tmp_skip_list) > 0:
+        #     print(f"skip: {wsi_path}")
+        #     continue
 
         wsi = OpenSlideWSI(
             wsi_path,
@@ -461,5 +461,5 @@ def main_for_predmap():
 
 
 if __name__ == "__main__":
-    main()
-    # main_for_predmap()
+    # main()
+    main_for_predmap()
