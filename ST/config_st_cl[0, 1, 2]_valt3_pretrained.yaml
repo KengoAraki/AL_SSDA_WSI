@@ -16,10 +16,10 @@ main:
   pretrained_weight_dir: "/mnt/secssd/AL_SSDA_WSI_strage/s_result/checkpoints/s_MF0012_[0, 1, 2]/"
   pretrained_weight_names:
     - "cv0_epoch6.pth"
-    - "cv0_epoch6.pth"
-    - "cv0_epoch8.pth"
-    - "cv0_epoch5.pth"
-    - "cv0_epoch9.pth"
+    - "cv1_epoch6.pth"
+    - "cv2_epoch8.pth"
+    - "cv3_epoch5.pth"
+    - "cv4_epoch9.pth"
   # trg_selected_wsis:
   #   - "03_G144"
   #   - "03_G293"
@@ -36,8 +36,32 @@ dataset:
   trg_imgs_dir: "/mnt/secssd/SSDA_Annot_WSI_strage/mnt2/MF0003/"
 
 test:
-  weight_dir: "/mnt/secssd/AL_SSDA_WSI_strage/st_pretrained_result/checkpoints/"
-  output_dir: "/mnt/secssd/AL_SSDA_WSI_strage/st_pretrained_result/checkpoints/"
+  output_dir: "/mnt/secssd/AL_SSDA_WSI_strage/st_pretrained_result/test/"
   get_miss: False
   likelihood: False
-
+  weight_dir:
+    03_G144:
+      "/mnt/secssd/AL_SSDA_WSI_strage/st_pretrained_result/checkpoints/st1_valt3_pretrained_MF0012_03_G144_[0, 1, 2]/"
+    03_G293:
+      "/mnt/secssd/AL_SSDA_WSI_strage/st_pretrained_result/checkpoints/st1_valt3_pretrained_MF0012_03_G293_[0, 1, 2]/"
+    03_G109-1:
+      "/mnt/secssd/AL_SSDA_WSI_strage/st_pretrained_result/checkpoints/st1_valt3_pretrained_MF0012_03_G109-1_[0, 1, 2]/"
+  weight_names:
+    03_G144: 
+      - "cv0_epoch12.pth"
+      - "cv1_epoch3.pth"
+      - "cv2_epoch2.pth"
+      - "cv3_epoch15.pth"
+      - "cv4_epoch3.pth"
+    03_G293: 
+      - "cv0_epoch2.pth"
+      - "cv1_epoch3.pth"
+      - "cv2_epoch2.pth"
+      - "cv3_epoch3.pth"
+      - "cv4_epoch7.pth"
+    03_G109-1: 
+      - "cv0_epoch4.pth"
+      - "cv1_epoch2.pth"
+      - "cv2_epoch7.pth"
+      - "cv3_epoch5.pth"
+      - "cv4_epoch5.pth"

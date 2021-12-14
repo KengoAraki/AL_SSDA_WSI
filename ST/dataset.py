@@ -157,26 +157,28 @@ if __name__ == '__main__':
     )
 
     # WSIのリストを取得 (source)
-    cv_num = 0
-    src_train_wsis = joblib.load(
-        config['dataset']['jb_dir']
-        + f"{config['main']['src_facility']}/"
-        + f"cv{cv_num}_"
-        + f"train_{config['main']['src_facility']}_wsi.jb"
-    )
-
-    for trg_selected_wsi in trg_train_wsis:
-        print(f"===== {trg_selected_wsi} =====")
-        dataset = WSIDatasetST1_ValT(
-            trg_train_wsi=trg_selected_wsi,
-            src_train_wsis=src_train_wsis,
-            trg_valid_wsis=trg_valid_wsis,
-            trg_test_wsis=trg_test_wsis,
-            src_imgs_dir=config['dataset']['src_imgs_dir'],
-            trg_imgs_dir=config['dataset']['trg_imgs_dir'],
-            classes=config['main']['classes'],
-            shape=input_shape,
-            transform=transform,
-            balance_domain=False,
+    cv = 5
+    for cv_num in range(cv):
+        print(f"=== cv{cv_num} ===")
+        src_train_wsis = joblib.load(
+            config['dataset']['jb_dir']
+            + f"{config['main']['src_facility']}/"
+            + f"cv{cv_num}_"
+            + f"train_{config['main']['src_facility']}_wsi.jb"
         )
-        print(len(dataset))
+
+        for trg_selected_wsi in trg_train_wsis:
+            print(f"===== {trg_selected_wsi} =====")
+            dataset = WSIDatasetST1_ValT(
+                trg_train_wsi=trg_selected_wsi,
+                src_train_wsis=src_train_wsis,
+                trg_valid_wsis=trg_valid_wsis,
+                trg_test_wsis=trg_test_wsis,
+                src_imgs_dir=config['dataset']['src_imgs_dir'],
+                trg_imgs_dir=config['dataset']['trg_imgs_dir'],
+                classes=config['main']['classes'],
+                shape=input_shape,
+                transform=transform,
+                balance_domain=False,
+            )
+            print(len(dataset))

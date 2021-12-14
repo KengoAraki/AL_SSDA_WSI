@@ -215,10 +215,8 @@ def early_stop(val, epoch, best_model_info, patience=5, mode="max"):
 
 
 # source + 1枚のtargetで学習
-def main():
+def main(config_path: str):
     fix_seed(0)
-    # config_path = "../ST/config_st_cl[0, 1, 2]_valt3.yaml"
-    config_path = "../ST/config_st_cl[0, 1, 2]_valt3_pretrained.yaml"
 
     with open(config_path) as file:
         config = yaml.safe_load(file.read())
@@ -360,4 +358,6 @@ if __name__ == "__main__":
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
-    main()
+    # config_path = "../ST/config_st_cl[0, 1, 2]_valt3.yaml"
+    config_path = "../ST/config_st_cl[0, 1, 2]_valt3_pretrained.yaml"
+    main(config_path=config_path)
