@@ -248,4 +248,4 @@ if __name__ == "__main__":
     # config_path = "./S/config_s_cl[0, 1, 2].yaml"  # For debug
 
     main_trg(config_path=config_path, test_set="trg_unl")
-    main_src(config_path=config_path, test_set="test")
+    # main_src(config_path=config_path, test_set="test")
