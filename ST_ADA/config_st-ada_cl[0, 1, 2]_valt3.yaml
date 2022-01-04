@@ -9,7 +9,7 @@ main:
   shape: [256, 256]
   patience: 5
   stop_cond: "mIoU"
-  balance_domain: False
+  balance_domain: True
   cv: 5
   src_facility: "MF0012"
   trg_facility: "MF0003"

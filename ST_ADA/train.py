@@ -364,7 +364,10 @@ def main(config_path: str):
     unl_trg_train_wsis = copy.copy(trg_test_wsis)
 
     for cv_num in range(config["main"]["cv"]):
-        for l_trg_selected_wsi in l_trg_train_wsis:
+        for l_trg_num, l_trg_selected_wsi in enumerate(l_trg_train_wsis):
+            if l_trg_num != 0:
+                continue
+
             logging.info(f"== CV{cv_num}: {l_trg_selected_wsi} ==")
             writer = SummaryWriter(
                 log_dir=(
@@ -376,33 +379,28 @@ def main(config_path: str):
                 )
             )
 
-            # # 事前学習済みの重みを読み込み
-            # if config['main']['load_pretrained_weight_E']:
-            #     weight_E_path = (
-            #         config['main']['pretrained_weight_E_dir']
-            #         + config['main']['pretrained_weight_E_names'][cv_num]
-            #     )
+            # 事前学習済みの重みを読み込み
+            if config['main']['load_pretrained_weight_E']:
+                weight_E_path = (
+                    config['main']['pretrained_weight_E_dir']
+                    + config['main']['pretrained_weight_E_names'][cv_num]
+                )
+                if os.path.exists(weight_E_path) is False:
+                    logging.info(f"weight_E_path: {weight_E_path} does not exist")
+                    weight_E_path = None
+            else:
+                weight_E_path = None
 
             # モデルを取得
             netE = Encoder(
                 encoder_name=config['main']['model'],
                 num_classes=len(config['main']['classes']),
-                pretrained=False, weight_path=None, device=device
+                pretrained=True, weight_path=weight_E_path, device=device
             ).to(device)
 
             netD = Discriminator(
                 encoder_name=config['main']['model']
             ).to(device)
-
-            # FIXME: weightの名前をnetE用に修正する必要あり
-            # # 事前学習済みの重みを読み込み
-            # if config['main']['load_pretrained_weight_E']:
-            #     weight_E_path = (
-            #         config['main']['pretrained_weight_E_dir']
-            #         + config['main']['pretrained_weight_E_names'][cv_num]
-            #     )
-            #     netE.load_state_dict(torch.load(weight_E_path, map_location=device))
-            #     print(f"load_weight_E: {weight_E_path}")
 
             # WSIのリストを取得 (source)
             l_src_train_wsis = joblib.load(
@@ -497,6 +495,6 @@ if __name__ == "__main__":
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
-    # config_path = "../ST_ADA/config_st-ada_cl[0, 1, 2]_valt3.yaml"
-    config_path = "./ST_ADA/config_st-ada_cl[0, 1, 2]_valt3.yaml"
+    config_path = "../ST_ADA/config_st-ada_cl[0, 1, 2]_valt3.yaml"
+    # config_path = "./ST_ADA/config_st-ada_cl[0, 1, 2]_valt3.yaml"
     main(config_path=config_path)

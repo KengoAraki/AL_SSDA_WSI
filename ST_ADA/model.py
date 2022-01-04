@@ -62,6 +62,7 @@ class Encoder(nn.Module):
             base_model = build_model(encoder_name, self.num_classes, pretrained=True)
             if self.weight_path is not None:
                 base_model.load_state_dict(torch.load(self.weight_path, map_location=self.device))
+                print(f"pretrained_weight: {self.weight_path} is loaded")
         else:
             base_model = build_model(encoder_name, self.num_classes, pretrained=False)
         return base_model
