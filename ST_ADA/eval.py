@@ -10,7 +10,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from S.eval import get_confusion_matrix, plot_confusion_matrix, convert_plt2nd, eval_metrics
 
 
-
 # For train sets
 def eval_net_train(
     clf_l_preds,

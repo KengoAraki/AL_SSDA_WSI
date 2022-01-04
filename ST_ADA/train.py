@@ -19,9 +19,6 @@ from ST_ADA.model import Encoder, Discriminator
 from ST_ADA.dataset import WSIDataset_ST1_ADA_ValT
 from ST_ADA.eval import eval_net_train, eval_net_trg_val, tensorboard_logging
 
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-
 
 def train_net(
     netE,
@@ -35,7 +32,7 @@ def train_net(
     batch_size: int = 16,
     optim_name: str = "Adam",
     classes: list = [0, 1, 2],
-    checkpoint_dir: str ="checkpoints/",
+    checkpoint_dir: str = "checkpoints/",
     writer=None,
     patience: int = 5,
     stop_cond: str = "mIoU",
@@ -139,22 +136,21 @@ def train_net(
                 clf_imgs = clf_imgs.to(device=device, dtype=torch.float32)
                 clf_labels = clf_labels.to(device=device, dtype=torch.long)
 
+                clf_unl_imgs = unl_trg_imgs.to(device=device, dtype=torch.float32)
                 clf_unl_labels = unl_trg_labels.to(device=device, dtype=torch.long)
 
                 # Adversarial loss用
                 adv_labels = \
-                    torch.full((unl_trg_imgs.data.size()[0],),
-                    D_src_label, dtype=torch.long, device=device)
+                    torch.full((unl_trg_imgs.data.size()[0],), D_src_label, dtype=torch.long, device=device)
 
                 # Discriminator用
-                D_src_imgs = l_src_imgs
+                D_src_imgs = l_src_imgs.to(device=device, dtype=torch.float32)
                 D_trg_imgs = torch.cat((l_trg_imgs, unl_trg_imgs), 0)
+                D_trg_imgs = D_trg_imgs.to(device=device, dtype=torch.float32)
                 D_src_labels = \
-                    torch.full((l_src_imgs.data.size()[0],),
-                    D_src_label, dtype=torch.long, device=device)
+                    torch.full((l_src_imgs.data.size()[0],), D_src_label, dtype=torch.long, device=device)
                 D_trg_labels = \
-                    torch.full((D_trg_imgs.data.size()[0],),
-                    D_trg_label, dtype=torch.long, device=device)
+                    torch.full((D_trg_imgs.data.size()[0],), D_trg_label, dtype=torch.long, device=device)
 
                 # ===== train Encoder ===== #
                 # don't accumulate grads in D
@@ -168,16 +164,16 @@ def train_net(
                 clf_loss = criterion(clf_pred, clf_labels)
                 clf_loss = 1000 * clf_loss  # 係数(1000)は要調整
                 clf_loss.backward()
-                EC_loss_value += clf_loss
+                EC_loss_value += clf_loss.item()
 
                 # train with unlabeled target
-                unl_trg_featuremap = netE(unl_trg_imgs, mode="feature")
+                unl_trg_featuremap = netE(clf_unl_imgs, mode="feature")
                 unl_D_out = netD(unl_trg_featuremap)
                 unl_trg_loss = criterion(unl_D_out, adv_labels)
                 unl_trg_loss.backward()
-                A_loss_value += unl_trg_loss
+                A_loss_value += unl_trg_loss.item()
 
-                clf_unl_pred = netE(unl_trg_imgs, mode="class")  # for eval train
+                clf_unl_pred = netE(clf_unl_imgs, mode="class")  # for eval train
                 nn.utils.clip_grad_value_(netE.parameters(), 0.1)
                 optE.step()
 
@@ -380,25 +376,25 @@ def main(config_path: str):
                 )
             )
 
-            # 事前学習済みの重みを読み込み
-            if config['main']['load_pretrained_weight_E']:
-                weight_E_path = (
-                    config['main']['pretrained_weight_E_dir']
-                    + config['main']['pretrained_weight_E_names'][cv_num]
-                )
+            # # 事前学習済みの重みを読み込み
+            # if config['main']['load_pretrained_weight_E']:
+            #     weight_E_path = (
+            #         config['main']['pretrained_weight_E_dir']
+            #         + config['main']['pretrained_weight_E_names'][cv_num]
+            #     )
 
             # モデルを取得
             netE = Encoder(
                 encoder_name=config['main']['model'],
                 num_classes=len(config['main']['classes']),
-                pretrained=True, weight_path=weight_E_path, device=device
+                pretrained=False, weight_path=None, device=device
             ).to(device)
 
             netD = Discriminator(
-                encoder_name=config['main']['model'],
-                num_classes=len(config['main']['classes'])
+                encoder_name=config['main']['model']
             ).to(device)
 
+            # FIXME: weightの名前をnetE用に修正する必要あり
             # # 事前学習済みの重みを読み込み
             # if config['main']['load_pretrained_weight_E']:
             #     weight_E_path = (
@@ -496,5 +492,11 @@ def main(config_path: str):
                 except SystemExit:
                     os._exit(0)
 
+
 if __name__ == "__main__":
-    main()
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
+    # config_path = "../ST_ADA/config_st-ada_cl[0, 1, 2]_valt3.yaml"
+    config_path = "./ST_ADA/config_st-ada_cl[0, 1, 2]_valt3.yaml"
+    main(config_path=config_path)

@@ -1,57 +1,27 @@
 main:
-  classes: [1, 2]
-  epochs: 100
-  batch: 32
-  model: "resnet50"
-  learning_rate: 0.0001
-  shape: [256, 256]
-  cv_num: 0
-  
-dataset:
-  dataset_dir: "/mnt/ssdsub1/ADA_strage/mnt2/"
-  jb_dir: "/mnt/ssdsub1/ADA_strage/result/dataset/"
-  source: "MF0012"
-  # target: "MF0017"
-  target: "MF0003"
-
-weight:
-  # weight_path_E: "/mnt/ssdsub1/ADA_results/[1, 2]/resnet50_Adam_batch32_shape[256, 256]_cl[1, 2]/ADA(src-MF0012_trg-MF0017)/pretrained_weights/Encoder/cv0_epoch9_best_val_recall.pth"
-   weight_path_E: "/mnt/ssdsub1/ADA_results/[1, 2]/resnet50_Adam_batch32_shape[256, 256]_cl[1, 2]/ADA(src-MF0012_trg-MF0003)/pretrained_weights/Encoder/cv0_epoch9_best_val_recall.pth"
-
-result:
-  result_dir: "/mnt/ssdsub1/ADA_strage/result/"
-
-test:
-  # output_dir: "/mnt/ssdsub1/ADA_strage/result/test/[1, 2]/ADA(src-MF0012_trg-MF0017)/"
-  output_dir: "/mnt/ssdsub1/ADA_strage/result/test/[1, 2]/ADA(src-MF0012_trg-MF0003)/"
-  data_mode: "test"
-  # weight_path: "/mnt/ssdsub1/ADA_results/[1, 2]/resnet50_Adam_batch32_shape[256, 256]_cl[1, 2]/ADA(src-MF0012_trg-MF0017)/weights/Encoder/cv0_E_epoch000.pth"
-  weight_path: "/mnt/ssdsub1/ADA_results/[1, 2]/resnet50_Adam_batch32_shape[256, 256]_cl[1, 2]/ADA(src-MF0012_trg-MF0003)/weights/Encoder/cv0_E_epoch000.pth"
-
-# ================== #
-main:
   prefix: "st1-ada_valt3"
   classes: [0, 1, 2]
   epochs: 100
-  batch_size: 32
+  # batch_size: 32
+  batch_size: 16
   model: "resnet50"
   optim: "Adam"
   shape: [256, 256]
   patience: 5
   stop_cond: "mIoU"
-  balance_domain: True
+  balance_domain: False
   cv: 5
   src_facility: "MF0012"
   trg_facility: "MF0003"
-  load_pretrained_weight_E: False
-  pretrained_weight_E_dir: ""
+  load_pretrained_weight_E: True
+  pretrained_weight_E_dir: "/mnt/secssd/AL_SSDA_WSI_strage/s_result/checkpoints/s_MF0012_[0, 1, 2]/"
   pretrained_weight_E_names:
-    - ""
-    - ""
-    - ""
-    - ""
-    - ""
-  result_dir: "/mnt/secssd/AL_SSDA_WSI_strage/st_result/"
+    - "cv0_epoch6.pth"
+    - "cv1_epoch6.pth"
+    - "cv2_epoch8.pth"
+    - "cv3_epoch5.pth"
+    - "cv4_epoch9.pth"
+  result_dir: "/mnt/secssd/AL_SSDA_WSI_strage/st_ada_result/"
   # trg_selected_wsis:
   #   - "03_G144"
   #   - "03_G293"

@@ -47,12 +47,17 @@ class WSIDataset_ST1_ADA_ValT(WSIDataset):
 
         # 各WSIのリストからpatchのpathリストを取得 (target)
         self.l_trg_train_files = self.get_files([self.l_trg_train_wsi], self.trg_imgs_dir)
-        self.l_trg_train_files = self.get_files(self.l_trg_train_wsi, self.trg_imgs_dir)
-        self.unl_trg_train_files = self.get_files(self.unl_trg_train_wsi, self.trg_imgs_dir)
+        self.unl_trg_train_files = self.get_files(self.unl_trg_train_wsis, self.trg_imgs_dir)
         self.trg_valid_files = self.get_files(self.trg_valid_wsis, self.trg_imgs_dir)
         self.trg_test_files = self.get_files(self.trg_test_wsis, self.trg_imgs_dir)
 
-        # src_train_filesとtrg_train_filesを同数にする
+        # FIXME: Debug用 ------------ #
+        # self.l_src_train_files = self.l_src_train_files[:512]
+        # # self.l_trg_train_files = self.l_trg_train_files[:512]
+        # self.unl_trg_train_files = self.unl_trg_train_files[:512]
+        # -------------------------- #
+
+        # l_src_train_filesとl_trg_train_filesを同数にする
         if balance_domain:
             self.rebalance()
 
@@ -77,6 +82,7 @@ class WSIDataset_ST1_ADA_ValT(WSIDataset):
         )
 
         self.l_src_train_data = WSI(self.l_src_train_files, self.classes, self.shape, self.transform)
+        self.l_trg_train_data = WSI(self.l_trg_train_files, self.classes, self.shape, self.transform)
         self.unl_trg_train_data = WSI(self.unl_trg_train_files, self.classes, self.shape, self.transform)
 
         test_transform = self.transform.copy()

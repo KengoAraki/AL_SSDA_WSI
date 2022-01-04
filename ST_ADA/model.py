@@ -34,15 +34,15 @@ def build_model(model_name, num_classes, pretrained=True):
 
 
 class Encoder(nn.Module):
-    def __init__(self, model_name, num_classes, pretrained=False, weight_path=None, device='cuda'):
+    def __init__(self, encoder_name, num_classes, pretrained=False, weight_path=None, device='cuda'):
         super().__init__()
-        self.model_name = model_name
+        self.encoder_name = encoder_name
         self.num_classes = num_classes
         self.pretrained = pretrained
         self.weight_path = weight_path
         self.device = device
         self.cnn, self.fc, self.pool = \
-            self.select_base_model(self.model_name)
+            self.select_base_model(self.encoder_name)
 
     def forward(self, x, mode="feature"):
         x = self.cnn(x)
@@ -56,45 +56,45 @@ class Encoder(nn.Module):
             sys.exit("select correct mode")
         return x
 
-    def load_model(self, model_name):
+    def load_model(self, encoder_name):
         # デフォルトの事前学習済みの重み(ImageNet)を読み込む場合
         if self.pretrained is True:
-            base_model = build_model(model_name, self.num_classes, pretrained=True)
+            base_model = build_model(encoder_name, self.num_classes, pretrained=True)
             if self.weight_path is not None:
                 base_model.load_state_dict(torch.load(self.weight_path, map_location=self.device))
         else:
-            base_model = build_model(model_name, self.num_classes, pretrained=False)
+            base_model = build_model(encoder_name, self.num_classes, pretrained=False)
         return base_model
 
-    def select_base_model(self, model_name):
-        model = self.load_model(model_name)
-        if model_name == "resnet18":
+    def select_base_model(self, encoder_name):
+        model = self.load_model(encoder_name)
+        if encoder_name == "resnet18":
             model.fc = nn.Linear(in_features=in_features["resnet18"], out_features=self.num_classes, bias=True)
             cnn = nn.Sequential(*list(model.children()))[:-2]
             fc = model.fc
             pool = nn.AdaptiveAvgPool2d(output_size=(1, 1))
-        elif model_name == "resnet50":
+        elif encoder_name == "resnet50":
             model.fc = nn.Linear(in_features=in_features["resnet50"], out_features=self.num_classes, bias=True)
             cnn = nn.Sequential(*list(model.children()))[:-2]
             fc = model.fc
             pool = nn.AdaptiveAvgPool2d(output_size=(1, 1))
-        elif model_name == "resnet101":
+        elif encoder_name == "resnet101":
             model.fc = nn.Linear(in_features=in_features["resnet101"], out_features=self.num_classes, bias=True)
             cnn = nn.Sequential(*list(model.children()))[:-2]
             fc = model.fc
             pool = nn.AdaptiveAvgPool2d(output_size=(1, 1))
-        elif model_name == "wide_resnet101":
+        elif encoder_name == "wide_resnet101":
             model.fc = nn.Linear(in_features=in_features["wide_resnet101"], out_features=self.num_classes, bias=True)
             cnn = nn.Sequential(*list(model.children()))[:-2]
             fc = model.fc
             pool = nn.AdaptiveAvgPool2d(output_size=(1, 1))
         else:
-            raise Exception("Unexpected model_name: {}".format(model_name))
+            raise Exception("Unexpected encoder_name: {}".format(encoder_name))
         return cnn, fc, pool
 
 
 class Discriminator(nn.Module):
-    def __init__(self, encoder_name: str, num_classes: int):
+    def __init__(self, encoder_name: str, num_classes: int = 2):
         super().__init__()
 
         self.layers = nn.Sequential(
@@ -107,7 +107,7 @@ class Discriminator(nn.Module):
 
 
 class Discriminator2(nn.Module):
-    def __init__(self, encoder_name: str, num_classes: int):
+    def __init__(self, encoder_name: str, num_classes: int = 2):
         super().__init__()
 
         self.layers = nn.Sequential(
