@@ -1,5 +1,5 @@
 main:
-  prefix: "st1-ada_valt3"
+  prefix: "st1-ada_pretrainedD_valt3"
   classes: [0, 1, 2]
   epochs: 100
   batch_size: 32
@@ -21,7 +21,7 @@ main:
     - "cv2_epoch8.pth"
     - "cv3_epoch5.pth"
     - "cv4_epoch9.pth"
-  result_dir: "/mnt/secssd/AL_SSDA_WSI_strage/st_ada_result/"
+  result_dir: "/mnt/secssd/AL_SSDA_WSI_strage/st_ada_pretrainedD_result/"
   # trg_selected_wsis:
   #   - "03_G144"
   #   - "03_G293"
