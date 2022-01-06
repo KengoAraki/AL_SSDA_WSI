@@ -14,6 +14,7 @@ import copy
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from S.eval import eval_metrics
+from S.train import update_best_model, early_stop
 from S.util import fix_seed, ImbalancedDatasetSampler, select_optim
 from ST_ADA.model import Encoder, Discriminator
 from ST_ADA.dataset import WSIDataset_ST1_ADA_ValT
@@ -292,42 +293,6 @@ def train_net(
 
     if writer is not None:
         writer.close()
-
-
-def update_best_model(val, epoch, best_model_info, mode="max"):
-    if mode == "min":
-        if val < best_model_info['val']:
-            best_model_info['val'] = val
-            best_model_info['epoch'] = epoch
-            print(
-                f"[Best Model] epoch: {best_model_info['epoch']}, \
-                val: {best_model_info['val']}"
-            )
-    elif mode == "max":
-        if val > best_model_info['val']:
-            best_model_info['val'] = val
-            best_model_info['epoch'] = epoch
-            print(
-                f"[Best Model] epoch: {best_model_info['epoch']}, \
-                val: {best_model_info['val']}"
-            )
-    else:
-        sys.exit("select mode max or min")
-    return best_model_info
-
-
-def early_stop(val, epoch, best_model_info, patience=5, mode="max"):
-    terminate = False
-    if (epoch - best_model_info['epoch']) == patience:
-        if mode == "min":
-            if val >= best_model_info['val']:
-                terminate = True
-        elif mode == "max":
-            if val <= best_model_info['val']:
-                terminate = True
-        else:
-            sys.exit("select mode max or min")
-    return terminate
 
 
 # source + 1枚のtargetで学習
