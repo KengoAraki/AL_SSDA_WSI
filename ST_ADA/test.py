@@ -3,67 +3,74 @@ import sys
 import logging
 import yaml
 import joblib
-from tqdm import tqdm
-
+import numpy as np
 import torch
 from torch.utils.data import DataLoader
 import torch.nn as nn
 import matplotlib.pyplot as plt
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-from dataset import Source_Dataset, Target_Dataset
-from eval import plot_confusion_matrix, eval_metrics, get_confusion_matrix
-from util import fix_seed
-from model import Encoder
+from S.eval import eval_metrics, plot_confusion_matrix
+from S.dataset import WSI, get_files
+from S.util import fix_seed
+from ST_ADA.model import Encoder
+from ST_ADA.eval import eval_net_test
 
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-
-# FIXME: 要修正
 
 def test_net(
-    netE,
-    loader,
-    device,
-    batch,
-    classes,
-    output_dir,
-    project,
-    data_mode="test"
+    net,
+    files: list,
+    classes: list,
+    test_set: str,
+    output_dir: str,
+    project: str = "test_net",
+    device=torch.device('cuda'),
+    shape: tuple = (256, 256),
+    batch_size: int = 32,
+    get_miss: bool = False,
 ):
-    netE.eval()
+    criterion = nn.CrossEntropyLoss()
 
-    n_val = len(loader)  # the number of batch
-    init_flag = True
+    dataset = WSI(
+        files,
+        classes,
+        shape,
+        transform={"Resize": True, "HFlip": False, "VFlip": False},
+    )
 
-    with tqdm(total=n_val, desc='Validation round', unit='batch', leave=False) as pbar:
-        for i, data in enumerate(loader):
-            img = data["img"].to(device)
-            gt = data["gt"].to(device)
+    loader = DataLoader(
+        dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=2,
+        pin_memory=True,
+    )
+    _, cm = eval_net_test(
+        net,
+        loader,
+        criterion,
+        device,
+        get_miss=get_miss,
+        save_dir=output_dir,
+    )
 
-            with torch.no_grad():
-                pred = netE(img, mode="class")
-
-            # confusion matrix
-            if netE.fc.out_features > 1:
-                pred = nn.Softmax(dim=1)(pred)
-            if init_flag:
-                cm = get_confusion_matrix(pred, gt)
-                init_flag = False
-            else:
-                cm += get_confusion_matrix(pred, gt)
-
-            pbar.update()
-
-    logging.info(f"\n cm ({data_mode}):\n{cm}\n")
+    logging.info(
+        f"\n cm ({test_set}):\n{np.array2string(cm, separator=',')}\n"
+    )
     val_metrics = eval_metrics(cm)
-    logging.info(f"\n Accuracy ({data_mode}):  {val_metrics['accuracy']}")
-    logging.info(f"\n Precision ({data_mode}): {val_metrics['precision']}")
-    logging.info(f"\n Recall ({data_mode}):    {val_metrics['recall']}")
+    logging.info("===== eval metrics =====")
+    logging.info(
+        f"\n Accuracy ({test_set}):  {val_metrics['accuracy']}"
+    )
+    logging.info(
+        f"\n Precision ({test_set}): {val_metrics['precision']}"
+    )
+    logging.info(f"\n Recall ({test_set}):    {val_metrics['recall']}")
+    logging.info(f"\n F1 ({test_set}):        {val_metrics['f1']}")
+    logging.info(f"\n mIoU ({test_set}):      {val_metrics['mIoU']}")
 
     # Not-Normalized
-    cm_plt = plot_confusion_matrix(
-        cm, classes, normalize=False)
+    cm_plt = plot_confusion_matrix(cm, classes, normalize=False)
     cm_plt.savefig(
         output_dir
         + project
@@ -73,8 +80,7 @@ def test_net(
     plt.close()
 
     # Normalized
-    cm_plt = plot_confusion_matrix(
-        cm, classes, normalize=True)
+    cm_plt = plot_confusion_matrix(cm, classes, normalize=True)
     cm_plt.savefig(
         output_dir
         + project
@@ -84,124 +90,85 @@ def test_net(
     plt.close()
 
 
-def test():
+def main_trg(trg_l_wsi: str, config_path: str, test_set: str = "trg_unl"):
     fix_seed(0)
 
     # ==== load config ===== #
-    # config_path = "./config/config.yaml"
-    config_path = "../config/config.yaml"
     with open(config_path) as file:
         config = yaml.safe_load(file.read())
 
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    weight_list = [
+        config['test']['weight_dir'][trg_l_wsi] + name
+        for name
+        in config['test']['weight_names'][trg_l_wsi]
+    ]
 
-    classes = config['main']['classes']
-    batch = config['main']['batch']
-    encoder_name = config['main']['encoder_name']
-    shape = tuple(config['main']['shape'])
-    cv_num = config['main']['cv_num']
-    num_classes = len(classes)
-
-    dataset_dir = config['dataset']['dataset_dir']
-    jb_dir = config['dataset']['jb_dir']
-    source = config['dataset']['source']
-    target = config['dataset']['target']
-
-    output_dir = config['test']['output_dir']
-    data_mode = config['test']['data_mode']
-    weight_path = config['test']['weight_path']
-
-    transform = {'Resize': True, 'HFlip': False, 'VFlip': False}
-    num_workers = 2
-
-    # project = f"ADA_src-{source}_trg-{target}_{encoder_name}_cl{classes}_{data_mode}_cv{cv_num}"
-    project = f"cv{cv_num}_ADA_src-{source}_trg-{target}_{encoder_name}_cl{classes}_{data_mode}"
     logging.basicConfig(
         level=logging.INFO,
-        filename=f"{output_dir}{project}.txt",
-        format='%(levelname)s: %(message)s'
+        filename=f"{config['test']['output_dir']}st1-ada_{config['main']['src_facility']}_{trg_l_wsi}_{test_set}-{config['main']['trg_facility']}.txt",
+        format="%(levelname)s: %(message)s",
     )
-    logging.info(f"{project}\n")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # load model
-    logging.info("Loading model {}".format(weight_path))
-    netE = Encoder(encoder_name, num_classes, pretrained=False).to(device)
-    netE.load_state_dict(
-        torch.load(weight_path, map_location=device))
-    logging.info("Model loaded !")
+    for cv_num in range(config['main']['cv']):
 
-    # === Source data === #
-    logging.info("=== test source data ===")
-    test_source_wsi = joblib.load(
-        jb_dir
-        + f"source_{source}/"
-        + f"cv{cv_num}_{data_mode}_source-{source}_wsi.jb"
-    )
+        logging.info(f"\n\n\n== CV{cv_num} ==")
+        weight_path = weight_list[cv_num]
+        project_prefix = f"st1_{config['main']['src_facility']}_{trg_l_wsi}_cv{cv_num}_"
 
-    test_source_dataset = Source_Dataset(
-        test_source_wsi,
-        imgs_dir=f"{dataset_dir}{source}/",
-        classes=classes,
-        shape=shape,
-        transform=transform,
-        mode="test"
-    )
-    test_source_loader = DataLoader(
-        test_source_dataset, batch_size=batch, shuffle=False, num_workers=num_workers, pin_memory=True
-    )
-    num_test_source = test_source_dataset.__len__()
-    logging.info(f"num_test_source: {num_test_source}")
-
-    test_net(
-        netE,
-        test_source_loader,
-        device,
-        batch,
-        classes,
-        output_dir,
-        f"{project}_source",
-        data_mode=data_mode
-    )
-
-    # === Target data === #
-    logging.info("=== test target data ===")
-    test_target_wsi = joblib.load(
-        jb_dir
-        + f"target_{target}/"
-        + f"cv{cv_num}_{data_mode}_target-{target}_wsi.jb"
-    )
-    if data_mode == "train":
-        test_target_wsi += joblib.load(
-            jb_dir
-            + f"target_{target}/"
-            + f"cv{cv_num}_valid_target-{target}_wsi.jb"
+        project = (
+            project_prefix
+            + config['main']['model']
+            + "_"
+            + config['main']['optim']
+            + "_batch"
+            + str(config['main']['batch_size'])
+            + "_shape"
+            + str(config['main']['shape'])
+            + "_"
+            + test_set
+            + "-"
+            + config['main']['trg_facility']
         )
+        logging.info(f"{project}\n")
 
-    test_target_dataset = Target_Dataset(
-        test_target_wsi,
-        imgs_dir=f"{dataset_dir}{target}/",
-        classes=classes,
-        shape=shape,
-        transform=transform,
-        mode="test"
-    )
-    test_target_loader = DataLoader(
-        test_target_dataset, batch_size=batch, shuffle=False, num_workers=num_workers, pin_memory=True
-    )
-    num_test_target = test_target_dataset.__len__()
-    logging.info(f"num_test_target: {num_test_target}")
+        # --- targetデータ --- #
+        wsis = joblib.load(
+            config['dataset']['jb_dir']
+            + f"{config['main']['trg_facility']}/"
+            + f"{test_set}_wsi.jb"
+        )
+        files = get_files(
+            wsis, config['main']['classes'], config['dataset']['trg_imgs_dir']
+        )
+        # ------------- #
 
-    test_net(
-        netE,
-        test_target_loader,
-        device,
-        batch,
-        classes,
-        output_dir,
-        f"{project}_target",
-        data_mode=data_mode
-    )
+        net = Encoder(
+            encoder_name=config['main']['model'],
+            num_classes=len(config['main']['classes']),
+            pretrained=False, weight_path=None, device=device
+        ).to(device)
+        logging.info("Loading model {}".format(weight_path))
+        net.load_state_dict(torch.load(weight_path, map_location=device))
+
+        test_net(
+            net=net,
+            files=files,
+            classes=config['main']['classes'],
+            test_set=test_set,
+            output_dir=config['test']['output_dir'],
+            project=project,
+            device=device,
+            shape=tuple(config['main']['shape']),
+            batch_size=config['main']['batch_size'],
+        )
 
 
 if __name__ == "__main__":
-    test()
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
+    # config_path = "./config/config_st-ada_cl[0, 1, 2]_valt3.yaml"
+    config_path = "../config/config_st-ada_cl[0, 1, 2]_valt3.yaml"
+
+    main_trg(trg_l_wsi='03_G144', config_path=config_path, test_set="trg_unl")
