@@ -16,8 +16,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from S.train import update_best_model, early_stop
 from S.eval import eval_metrics
 from S.util import fix_seed, ImbalancedDatasetSampler, select_optim
-from ST_ADA.model import Encoder, Discriminator
-from ST_ADA.dataset import WSIDataset_ST1_ADA_ValT
+from ST_ADA.model import Encoder, Discriminator, Discriminator2
+from ST_ADA.dataset import WSIDataset_ST1_ADA_ValT_d
 from ST_ADA.eval import eval_net_train_d, eval_net_trg_val_d, tensorboard_logging
 
 
@@ -27,7 +27,8 @@ def train_net(
     l_src_train_data,
     l_trg_train_data,
     unl_trg_train_data,
-    valid_data,
+    src_valid_data,
+    trg_valid_data,
     device,
     epochs: int = 5,
     batch_size: int = 16,
@@ -45,7 +46,8 @@ def train_net(
     l_src_train_data: labeled source train datasaet (torch.utils.data.Dataset),
     l_trg_train_data: labeled target train datasaet (torch.utils.data.Dataset),
     unl_trg_train_data: unlabeled target train dataset (torch.utils.data.Dataset),
-    valid_data: target validation dataset (torch.utils.data.Dataset),
+    src_valid_data: source validation dataset (torch.utils.data.Dataset),
+    trg_valid_data: target validation dataset (torch.utils.data.Dataset),
     """
 
     l_src_train_loader = DataLoader(
@@ -75,8 +77,17 @@ def train_net(
         pin_memory=True,
         drop_last=True,
     )
-    val_loader = DataLoader(
-        valid_data,
+    src_val_loader = DataLoader(
+        src_valid_data,
+        sampler=None,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=2,
+        pin_memory=True,
+        drop_last=True,
+    )
+    trg_val_loader = DataLoader(
+        trg_valid_data,
         sampler=None,
         batch_size=batch_size,
         shuffle=False,
@@ -175,7 +186,7 @@ def train_net(
 
         # calculate validation loss and confusion matrix
         d_val_loss, d_val_cm = \
-            eval_net_trg_val_d(netE, netD, val_loader, criterion, device, trg_label=D_trg_label)
+            eval_net_trg_val_d(netE, netD, src_val_loader, trg_val_loader, criterion, device, src_label=D_src_label, trg_label=D_trg_label)
 
         # calculate validation metircs
         val_metrics = eval_metrics(d_val_cm)
@@ -296,7 +307,11 @@ def main(config_path: str):
                 pretrained=True, weight_path=weight_E_path, device=device
             ).to(device)
 
-            netD = Discriminator(
+            # netD = Discriminator(
+            #     encoder_name=config['main']['model']
+            # ).to(device)
+
+            netD = Discriminator2(
                 encoder_name=config['main']['model']
             ).to(device)
 
@@ -307,11 +322,18 @@ def main(config_path: str):
                 + f"cv{cv_num}_"
                 + f"train_{config['main']['src_facility']}_wsi.jb"
             )
+            src_valid_wsis = joblib.load(
+                config['dataset']['jb_dir']
+                + f"{config['main']['src_facility']}/"
+                + f"cv{cv_num}_"
+                + f"valid_{config['main']['src_facility']}_wsi.jb"
+            )
 
-            dataset = WSIDataset_ST1_ADA_ValT(
+            dataset = WSIDataset_ST1_ADA_ValT_d(
                 l_src_train_wsis=l_src_train_wsis,
                 l_trg_train_wsi=l_trg_selected_wsi,
                 unl_trg_train_wsis=unl_trg_train_wsis,
+                src_valid_wsis=src_valid_wsis,
                 trg_valid_wsis=trg_valid_wsis,
                 trg_test_wsis=trg_test_wsis,
                 src_imgs_dir=config['dataset']['src_imgs_dir'],
@@ -322,7 +344,7 @@ def main(config_path: str):
                 balance_domain=config['main']['balance_domain'],
             )
 
-            l_src_train_data, l_trg_train_data, unl_trg_train_data, valid_data, test_data = dataset.get()
+            l_src_train_data, l_trg_train_data, unl_trg_train_data, src_valid_data, trg_valid_data, test_data = dataset.get()
 
             logging.info(
                 f"""Starting training:
@@ -335,7 +357,8 @@ def main(config_path: str):
                 Train size(l_src):  {len(l_src_train_data)}
                 Train size(l_trg):  {len(l_trg_train_data)}
                 Train size(unl_trg):{len(unl_trg_train_data)}
-                Validation size:    {len(valid_data)}
+                Valid size(src):    {len(src_valid_data)}
+                Valid size(trg):    {len(trg_valid_data)}
                 Patience:           {config['main']['patience']}
                 StopCond:           {config['main']['stop_cond']}
                 Device:             {device.type}
@@ -349,6 +372,9 @@ def main(config_path: str):
             checkpoint_dir = (
                 f"{config['main']['result_dir']}checkpoints/"
                 + f"{config['main']['prefix']}_ADA_{config['main']['src_facility']}_{l_trg_selected_wsi}_{config['main']['classes']}/")
+            if os.path.exists(f"{config['main']['result_dir']}checkpoints/") is False:
+                os.mkdir(f"{config['main']['result_dir']}checkpoints/")
+
             try:
                 os.mkdir(checkpoint_dir)
                 logging.info("Created checkpoint directory")
@@ -362,7 +388,8 @@ def main(config_path: str):
                     l_src_train_data=l_src_train_data,
                     l_trg_train_data=l_trg_train_data,
                     unl_trg_train_data=unl_trg_train_data,
-                    valid_data=valid_data,
+                    src_valid_data=src_valid_data,
+                    trg_valid_data=trg_valid_data,
                     device=device,
                     epochs=config['main']['epochs'],
                     batch_size=config['main']['batch_size'],

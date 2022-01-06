@@ -114,8 +114,6 @@ class Discriminator2(nn.Module):
         self.layers = nn.Sequential(
             nn.Linear(in_features=in_features[encoder_name], out_features=500, bias=True),
             nn.ReLU(),
-            nn.Linear(in_features=500, out_features=500, bias=True),
-            nn.ReLU(),
             nn.Linear(in_features=500, out_features=num_classes, bias=True),
         )
 
