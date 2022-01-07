@@ -27,7 +27,6 @@ def test_net(
     device=torch.device('cuda'),
     shape: tuple = (256, 256),
     batch_size: int = 32,
-    get_miss: bool = False,
 ):
     criterion = nn.CrossEntropyLoss()
 
@@ -50,8 +49,6 @@ def test_net(
         loader,
         criterion,
         device,
-        get_miss=get_miss,
-        save_dir=output_dir,
     )
 
     logging.info(

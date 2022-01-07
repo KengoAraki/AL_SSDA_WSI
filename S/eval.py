@@ -158,7 +158,7 @@ def get_confusion_matrix(preds, targs):
     return cm
 
 
-def plot_confusion_matrix(cm, class_names, normalize=True):
+def plot_confusion_matrix(cm, class_names, normalize=True, font_size=20):
     """
     Returns a matplotlib figure containing the plotted confusion matrix.
 
@@ -169,7 +169,7 @@ def plot_confusion_matrix(cm, class_names, normalize=True):
     """
 
     figure = plt.figure(figsize=(8, 8))
-    plt.rcParams["font.size"] = 20
+    plt.rcParams["font.size"] = font_size
 
     # Normalize the confusion matrix.
     if normalize:
