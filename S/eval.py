@@ -158,7 +158,7 @@ def get_confusion_matrix(preds, targs):
     return cm
 
 
-def plot_confusion_matrix(cm, class_names, normalize=True, font_size=20):
+def plot_confusion_matrix(cm, class_names, normalize=True, font_size=20, rotation=45):
     """
     Returns a matplotlib figure containing the plotted confusion matrix.
 
@@ -177,10 +177,10 @@ def plot_confusion_matrix(cm, class_names, normalize=True, font_size=20):
         plt.imshow(cm, interpolation="nearest", cmap=plt.cm.Blues, vmin=0, vmax=1)
     else:
         plt.imshow(cm, interpolation="nearest", cmap=plt.cm.Blues)
-    plt.title("Confusion matrix")
+    # plt.title("Confusion matrix")
     # plt.colorbar()
     tick_marks = np.arange(len(class_names))
-    plt.xticks(tick_marks, class_names, rotation=45)
+    plt.xticks(tick_marks, class_names, rotation=rotation)
     plt.yticks(tick_marks, class_names)
 
     # Use white text if squares are dark; otherwise black.
