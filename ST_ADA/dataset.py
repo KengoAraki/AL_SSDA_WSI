@@ -51,11 +51,11 @@ class WSIDataset_ST1_ADA_ValT(WSIDataset):
         self.trg_valid_files = self.get_files(self.trg_valid_wsis, self.trg_imgs_dir)
         self.trg_test_files = self.get_files(self.trg_test_wsis, self.trg_imgs_dir)
 
-        # FIXME: Debug用 ------------ #
+        # # FIXME: Debug用 ------------ #
         # self.l_src_train_files = self.l_src_train_files[:512]
         # # self.l_trg_train_files = self.l_trg_train_files[:512]
         # self.unl_trg_train_files = self.unl_trg_train_files[:512]
-        # -------------------------- #
+        # # -------------------------- #
 
         # l_src_train_filesとl_trg_train_filesを同数にする
         if balance_domain:

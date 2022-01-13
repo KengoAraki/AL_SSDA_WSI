@@ -27,6 +27,7 @@ def test_net(
     device=torch.device('cuda'),
     shape: tuple = (256, 256),
     batch_size: int = 32,
+    rotation: int = 0,
 ):
     criterion = nn.CrossEntropyLoss()
 
@@ -72,7 +73,7 @@ def test_net(
     cl_labels = ["Non-\nNeop.", "LSIL", "HSIL"]
 
     # Not-Normalized
-    cm_plt = plot_confusion_matrix(cm, cl_labels, normalize=False, font_size=25)
+    cm_plt = plot_confusion_matrix(cm, cl_labels, normalize=False, font_size=25, rotation=rotation)
     cm_plt.savefig(
         output_dir
         + project
@@ -82,7 +83,7 @@ def test_net(
     plt.close()
 
     # Normalized
-    cm_plt = plot_confusion_matrix(cm, cl_labels, normalize=True, font_size=35)
+    cm_plt = plot_confusion_matrix(cm, cl_labels, normalize=True, font_size=35, rotation=rotation)
     cm_plt.savefig(
         output_dir
         + project
@@ -96,6 +97,7 @@ def test_net(
 
 def main_trg(trg_l_wsi: str, config_path: str, test_set: str = "trg_unl"):
     fix_seed(0)
+    rotation = 0
 
     # ==== load config ===== #
     with open(config_path) as file:
@@ -165,6 +167,7 @@ def main_trg(trg_l_wsi: str, config_path: str, test_set: str = "trg_unl"):
             device=device,
             shape=tuple(config['main']['shape']),
             batch_size=config['main']['batch_size'],
+            rotation=rotation
         )
 
         if cv_num == 0:
@@ -213,7 +216,7 @@ def main_trg(trg_l_wsi: str, config_path: str, test_set: str = "trg_unl"):
     cl_labels = ["Non-\nNeop.", "LSIL", "HSIL"]
 
     # Not-Normalized
-    cm_plt = plot_confusion_matrix(cm, cl_labels, normalize=False, font_size=25)
+    cm_plt = plot_confusion_matrix(cm, cl_labels, normalize=False, font_size=25, rotation=rotation)
     cm_plt.savefig(
         config['test']['output_dir']
         + project
@@ -223,7 +226,7 @@ def main_trg(trg_l_wsi: str, config_path: str, test_set: str = "trg_unl"):
     plt.close()
 
     # Normalized
-    cm_plt = plot_confusion_matrix(cm, cl_labels, normalize=True, font_size=35)
+    cm_plt = plot_confusion_matrix(cm, cl_labels, normalize=True, font_size=35, rotation=rotation)
     cm_plt.savefig(
         config['test']['output_dir']
         + project

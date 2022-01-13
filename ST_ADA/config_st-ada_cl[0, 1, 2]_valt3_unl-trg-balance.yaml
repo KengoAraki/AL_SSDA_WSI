@@ -1,5 +1,5 @@
 main:
-  prefix: "st1-ada_valt3"
+  prefix: "st1-ada_valt3_unl-trg-balance"
   classes: [0, 1, 2]
   epochs: 100
   # batch_size: 32

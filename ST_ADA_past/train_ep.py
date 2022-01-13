@@ -51,7 +51,7 @@ def train_net(
     l_src_train_loader = DataLoader(
         l_src_train_data,
         sampler=ImbalancedDatasetSampler(l_src_train_data),
-        batch_size=batch_size,
+        batch_size=batch_size * 2,
         shuffle=False,
         num_workers=2,
         pin_memory=True,
@@ -66,21 +66,11 @@ def train_net(
         pin_memory=True,
         drop_last=True,
     )
-    # # unlabeledなのにImbalancedSamplerを使うのはチートかも
-    # unl_trg_train_loader = DataLoader(
-    #     unl_trg_train_data,
-    #     sampler=ImbalancedDatasetSampler(unl_trg_train_data),
-    #     batch_size=batch_size,
-    #     shuffle=False,
-    #     num_workers=2,
-    #     pin_memory=True,
-    #     drop_last=True,
-    # )
     unl_trg_train_loader = DataLoader(
         unl_trg_train_data,
-        sampler=None,
+        sampler=ImbalancedDatasetSampler(unl_trg_train_data),
         batch_size=batch_size,
-        shuffle=True,
+        shuffle=False,
         num_workers=2,
         pin_memory=True,
         drop_last=True,
@@ -135,6 +125,7 @@ def train_net(
             for l_src_batch, l_trg_batch, unl_trg_batch in zip(
                 l_src_train_loader, l_trg_train_loader, unl_trg_train_loader
             ):
+                # unl_batchのbatchサイズはl_batchの2倍
                 l_src_imgs, l_src_labels = l_src_batch["image"], l_src_batch["label"]
                 l_trg_imgs, l_trg_labels = l_trg_batch["image"], l_trg_batch["label"]
                 unl_trg_imgs, unl_trg_labels = unl_trg_batch["image"], unl_trg_batch["label"]
@@ -155,8 +146,7 @@ def train_net(
 
                 # Discriminator用
                 D_src_imgs = l_src_imgs.to(device=device, dtype=torch.float32)
-                h_src_size = l_src_imgs.data.size()[0] // 2
-                D_trg_imgs = torch.cat((l_trg_imgs[:h_src_size, :, :, :], unl_trg_imgs[:h_src_size, :, :, :]), 0)
+                D_trg_imgs = torch.cat((l_trg_imgs, unl_trg_imgs), 0)
                 D_trg_imgs = D_trg_imgs.to(device=device, dtype=torch.float32)
                 D_src_labels = \
                     torch.full((l_src_imgs.data.size()[0],), D_src_label, dtype=torch.long, device=device)
@@ -197,16 +187,14 @@ def train_net(
 
                 # train with source
                 D_src_featuremap = netE(D_src_imgs, mode="feature")
-                D_src_featuremap = D_src_featuremap.detach()  # stop updating Encoder(CNN)
-                D_src_out = netD(D_src_featuremap)
+                D_src_out = netD(D_src_featuremap.detach())  # stop updating Encoder(CNN)
                 D_src_loss = criterion(D_src_out, D_src_labels)
                 D_src_loss.backward()
                 D_loss_value += D_src_loss.item()
 
                 # train with target
                 D_trg_featuremap = netE(D_trg_imgs, mode="feature")
-                D_trg_featuremap = D_trg_featuremap.detach()  # stop updating Encoder(CNN)
-                D_trg_out = netD(D_trg_featuremap)
+                D_trg_out = netD(D_trg_featuremap.detach())  # stop updating Encoder(CNN)
                 D_trg_loss = criterion(D_trg_out, D_trg_labels)
                 D_trg_loss.backward()
                 D_loss_value += D_trg_loss.item()
@@ -258,9 +246,11 @@ def train_net(
         logging.info("\n Recall (valid, epoch): {}".format(val_metrics['recall']))
         logging.info("\n mIoU   (valid, epoch): {}".format(val_metrics['mIoU']))
 
-        # calculate unlabeled target loss and confusion matrix (for test)
+        # ====== new ======== #
+        # calculate unlabeled target loss and confusion matrix
         clf_unl_trg_loss, d_unl_trg_loss, clf_unl_trg_cm, d_unl_trg_cm = \
             eval_net_trg_val(netE, netD, unl_trg_train_loader, criterion, device, trg_label=D_trg_label)
+        # ====== new ======== #
 
         if writer is not None:
             # training log
@@ -291,7 +281,7 @@ def train_net(
                 mode="valid"
             )
 
-            # test log (unlabeled target)
+            # unl trg log
             writer = tensorboard_logging(
                 writer=writer,
                 epoch=epoch,
@@ -302,19 +292,19 @@ def train_net(
                 unl_cm=None,
                 d_cm=d_unl_trg_cm,
                 classes=classes,
-                mode="test(unl_trg)"
+                mode="valid(unl_trg)"
             )
 
+        torch.save(
+            netE.state_dict(),
+            checkpoint_dir + f"cv{cv_num}_E_epoch{epoch + 1:03d}.pth",
+        )
+        torch.save(
+            netD.state_dict(),
+            checkpoint_dir + f"cv{cv_num}_D_epoch{epoch + 1:03d}.pth",
+        )
         if best_model_info["epoch"] == epoch:
-            torch.save(
-                netE.state_dict(),
-                checkpoint_dir + f"cv{cv_num}_E_epoch{epoch + 1:03d}.pth",
-            )
-            torch.save(
-                netD.state_dict(),
-                checkpoint_dir + f"cv{cv_num}_D_epoch{epoch + 1:03d}.pth",
-            )
-            logging.info(f"Checkpoint {epoch + 1} saved !")
+            logging.info(f"Checkpoint {epoch + 1} updated!")
 
         if early_stop(cond_val, epoch, best_model_info, patience=patience, mode=mode):
             break
@@ -486,10 +476,8 @@ def main(config_path: str):
 
 if __name__ == "__main__":
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
-    # config_path = "../ST_ADA/config_st-ada_cl[0, 1, 2]_valt3_unl-trg-balance.yaml"
-
-    config_path = "../ST_ADA/config_st-ada_cl[0, 1, 2]_valt3.yaml"
-    # config_path = "./ST_ADA/config_st-ada_cl[0, 1, 2]_valt3.yaml"
+    config_path = "../ST_ADA/config_st-ada_ep_cl[0, 1, 2]_valt3.yaml"
+    # config_path = "./ST_ADA/config_st-ada_ep_cl[0, 1, 2]_valt3.yaml"
     main(config_path=config_path)
