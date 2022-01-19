@@ -23,6 +23,13 @@ def main_trg(config_path: str, test_set: str = "trg_unl"):
     with open(config_path) as file:
         config = yaml.safe_load(file.read())
 
+    output_dir = (
+        f"{config['test']['output_dir']}"
+        + f"{config['main']['prefix']}_{config['main']['src_facility']}_{config['main']['classes']}/")
+    if os.path.exists(output_dir) is False:
+        os.mkdir(output_dir)
+        logging.info("Create output directory")
+
     weight_list = [
         config['test']['weight_dir'] + name
         for name
@@ -31,7 +38,7 @@ def main_trg(config_path: str, test_set: str = "trg_unl"):
 
     logging.basicConfig(
         level=logging.INFO,
-        filename=f"{config['test']['output_dir']}{config['main']['prefix']}_{config['main']['src_facility']}_{test_set}-{config['main']['trg_facility']}.txt",
+        filename=f"{output_dir}{config['main']['prefix']}_{config['main']['src_facility']}_{test_set}-{config['main']['trg_facility']}.txt",
         format="%(levelname)s: %(message)s",
     )
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -82,7 +89,7 @@ def main_trg(config_path: str, test_set: str = "trg_unl"):
             files=files,
             classes=config['main']['classes'],
             test_set=test_set,
-            output_dir=config['test']['output_dir'],
+            output_dir=output_dir,
             project=project,
             device=device,
             shape=tuple(config['main']['shape']),
@@ -138,7 +145,7 @@ def main_trg(config_path: str, test_set: str = "trg_unl"):
     # Not-Normalized
     cm_plt = plot_confusion_matrix(cm, cl_labels, normalize=False, font_size=25, rotation=rotation)
     cm_plt.savefig(
-        config['test']['output_dir']
+        output_dir
         + project
         + "_nn-confmatrix.png"
     )
@@ -148,7 +155,7 @@ def main_trg(config_path: str, test_set: str = "trg_unl"):
     # Normalized
     cm_plt = plot_confusion_matrix(cm, cl_labels, normalize=True, font_size=35, rotation=rotation)
     cm_plt.savefig(
-        config['test']['output_dir']
+        output_dir
         + project
         + "_confmatrix.png"
     )
@@ -158,8 +165,12 @@ def main_trg(config_path: str, test_set: str = "trg_unl"):
 
 if __name__ == "__main__":
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
     # config_path = "./S_ADA/config_s-ada_cl[0, 1, 2]_valt3.yaml"
-    config_path = "../S_ADA/config_s-ada_cl[0, 1, 2]_valt3.yaml"
+    # config_path = "../S_ADA/config_s-ada_cl[0, 1, 2]_valt3.yaml"
+
+    # config_path = "./S_ADA/config_s-ada_cl[0, 1, 2]_valt3_unl-trg-balance.yaml"
+    config_path = "../S_ADA/config_s-ada_cl[0, 1, 2]_valt3_unl-trg-balance.yaml"
+
     main_trg(config_path=config_path, test_set="trg_unl")
