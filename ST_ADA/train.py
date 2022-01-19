@@ -129,7 +129,7 @@ def train_net(
         d_train_cm = np.zeros((2, 2), dtype=np.int64)  # for Discriminator
 
         with tqdm(
-            total=n_train, desc=f"Epoch {epoch + 1}/{epochs}", unit="img"
+            total=n_train, desc=f"Epoch {epoch + 1}/{epochs}", unit="batch"
         ) as pbar:
             # 短いdataloaderに合わせる
             for l_src_batch, l_trg_batch, unl_trg_batch in zip(
