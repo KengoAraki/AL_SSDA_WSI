@@ -30,7 +30,7 @@ dataset:
 
 test:
   output_dir: "/mnt/secssd/AL_SSDA_WSI_strage/s_ada_result/test/"
-  # weight_dir: "/mnt/secssd/AL_SSDA_WSI_strage/s_ada_result/checkpoints/s-ada_valt3_ADA_MF0012_[0, 1, 2]/"
+  weight_dir: "/mnt/secssd/AL_SSDA_WSI_strage/s_ada_result/checkpoints/s-ada_valt3_ADA_MF0012_03_G144_[0, 1, 2]/"
   # weight_names:
     # - "cv0_E_epoch003.pth"
     # - "cv1_E_epoch012.pth"

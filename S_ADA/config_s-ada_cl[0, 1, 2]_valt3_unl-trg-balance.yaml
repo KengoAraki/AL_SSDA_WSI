@@ -1,5 +1,5 @@
 main:
-  prefix: "st1-ada_valt3"
+  prefix: "s-ada_valt3_unl-trg-balance"
   classes: [0, 1, 2]
   epochs: 100
   # batch_size: 32
@@ -7,9 +7,8 @@ main:
   model: "resnet50"
   optim: "Adam"
   shape: [256, 256]
-  patience: 5
+  patience: 10
   stop_cond: "mIoU"
-  balance_domain: False
   cv: 5
   src_facility: "MF0012"
   trg_facility: "MF0003"
@@ -21,15 +20,8 @@ main:
     - "cv2_epoch8.pth"
     - "cv3_epoch5.pth"
     - "cv4_epoch9.pth"
-  result_dir: "/mnt/secssd/AL_SSDA_WSI_strage/st_ada_result/"
-  # trg_selected_wsis:
-  #   - "03_G144"
-  #   - "03_G293"
-  #   - "03_G109-1"
-  # trg_valid_wsis:
-  #   - "03_G170"
-  #   - "03_G142"
-  #   - "03_G143"
+  result_dir: "/mnt/secssd/AL_SSDA_WSI_strage/s_ada_result/"
+
   
 dataset:
   jb_dir: "/mnt/secssd/AL_SSDA_WSI_strage/dataset/"
@@ -37,15 +29,12 @@ dataset:
   trg_imgs_dir: "/mnt/secssd/SSDA_Annot_WSI_strage/mnt2/MF0003/"
 
 test:
-  output_dir: "/mnt/secssd/AL_SSDA_WSI_strage/st_ada_result/test/"
-  weight_dir:
-    03_G144:
-      "/mnt/secssd/AL_SSDA_WSI_strage/st_ada_result/checkpoints/st1-ada_valt3_ADA_MF0012_03_G144_[0, 1, 2]/"
+  output_dir: "/mnt/secssd/AL_SSDA_WSI_strage/s_ada_result/test/"
+  weight_dir: "/mnt/secssd/AL_SSDA_WSI_strage/s_ada_result/checkpoints/s-ada_valt3_unl-trg-balance_ADA_MF0012_03_G144_[0, 1, 2]/"
   weight_names:
-    03_G144: 
-      - "cv0_E_epoch002.pth"
-      - "cv1_E_epoch002.pth"
-      - "cv2_E_epoch005.pth"
-      - "cv3_E_epoch004.pth"
-      - "cv4_E_epoch001.pth"
+    - "cv0_E_epoch005.pth"
+    - "cv1_E_epoch011.pth"
+    - "cv2_E_epoch008.pth"
+    - "cv3_E_epoch015.pth"
+    - "cv4_E_epoch002.pth"
   
