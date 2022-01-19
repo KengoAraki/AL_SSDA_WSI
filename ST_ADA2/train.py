@@ -10,6 +10,7 @@ import yaml
 import logging
 import joblib
 import json
+from collections import Counter
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from S.eval import eval_metrics
@@ -44,9 +45,12 @@ def train_net(
     """
     netE: Encoder network (nn.Module),
     netD: Discriminator network (nn.Module),
-    clf_l_src_train_data: labeled source train datasaet (torch.utils.data.Dataset),
-    clf_l_trg_train_data: labeled target train datasaet (torch.utils.data.Dataset),
+    clf_l_src_train_data: labeled source train datasaet for classification (torch.utils.data.Dataset),
+    clf_l_trg_train_data: labeled target train datasaet for classification (torch.utils.data.Dataset),
+    d_l_src_train_data: labeled source train datasaet for discriminator (torch.utils.data.Dataset),
+    d_unl_trg_train_data: unlabeled target train datasaet for discriminator (torch.utils.data.Dataset),
     valid_data: target validation dataset (torch.utils.data.Dataset),
+    unl_trg_test_data: unlabeled target test dataset (torch.utils.data.Dataset),
     """
     # class-balanced
     clf_l_src_train_loader = DataLoader(
@@ -134,7 +138,6 @@ def train_net(
         netE.train()
         netD.train()
 
-        # pbar = tqdm(total=num_iter)
         EC_loss_value = 0
         A_loss_value = 0
         D_loss_value = 0
@@ -145,6 +148,9 @@ def train_net(
         with tqdm(
             total=n_train, desc=f"Epoch {epoch + 1}/{epochs}", unit="batch"
         ) as pbar:
+            count_src_cluster_ids = []  # to check imblanaced sampler
+            count_trg_cluster_ids = []  # to check imblanaced sampler
+
             # 短いdataloaderに合わせる
             for clf_l_src_batch, clf_l_trg_batch, d_l_src_batch, d_unl_trg_batch in zip(
                 clf_l_src_train_loader, clf_l_trg_train_loader, d_l_src_train_loader, d_unl_trg_train_loader
@@ -237,6 +243,11 @@ def train_net(
 
                 pbar.update(1)
 
+                count_src_cluster_ids.extend(d_l_src_batch["cluster_id"].tolist())  # to check sampler
+                count_trg_cluster_ids.extend(d_unl_trg_batch["cluster_id"].tolist())  # to check sampler
+        print(f"d_src_cluster_ids: {Counter(count_src_cluster_ids)}")  # to check sampler
+        print(f"d_trg_cluster_ids: {Counter(count_trg_cluster_ids)}")  # to check sampler
+
         # calculate averaged training loss
         EC_loss_value /= n_train
         A_loss_value /= n_train
@@ -265,7 +276,7 @@ def train_net(
         logging.info("\n mIoU   (valid, epoch): {}".format(val_metrics['mIoU']))
 
         # calculate unlabeled target loss and confusion matrix (for test)
-        clf_unl_trg_loss, d_unl_trg_loss, clf_unl_trg_cm, d_unl_trg_cm = \
+        clf_unl_trg_test_loss, d_unl_trg_test_loss, clf_unl_trg_test_cm, d_unl_trg_test_cm = \
             eval_net_trg_val(netE, netD, unl_trg_test_loader, criterion, device, trg_label=D_trg_label)
 
         if writer is not None:
@@ -301,12 +312,12 @@ def train_net(
             writer = tensorboard_logging(
                 writer=writer,
                 epoch=epoch,
-                loss_EC=clf_unl_trg_loss,
+                loss_EC=clf_unl_trg_test_loss,
                 loss_A=None,
-                loss_D=d_unl_trg_loss,
-                l_cm=clf_unl_trg_cm,
+                loss_D=d_unl_trg_test_loss,
+                l_cm=clf_unl_trg_test_cm,
                 unl_cm=None,
-                d_cm=d_unl_trg_cm,
+                d_cm=d_unl_trg_test_cm,
                 classes=classes,
                 mode="test (unl_trg)"
             )
@@ -348,15 +359,16 @@ def main(config_path: str):
         + f"{config['main']['trg_facility']}/"
         + "trg_l_wsi.jb"
     )
-    trg_valid_wsis = joblib.load(
-        config['dataset']['jb_dir']
-        + f"{config['main']['trg_facility']}/"
-        + "valid_wsi.jb"
-    )
     unl_trg_wsis = joblib.load(
         config['dataset']['jb_dir']
         + f"{config['main']['trg_facility']}/"
         + "trg_unl_wsi.jb"
+    )
+
+    trg_valid_wsis = joblib.load(
+        config['dataset']['jb_dir']
+        + f"{config['main']['trg_facility']}/"
+        + "valid_wsi.jb"
     )
 
     for cv_num in range(config["main"]["cv"]):
@@ -434,8 +446,8 @@ def main(config_path: str):
                 Transform:          {json.dumps(transform)}
                 Train clf (l_src):  {len(clf_l_src_data)}
                 Train clf (l_trg):  {len(clf_l_trg_data)}
-                Train d (l_src):    {len(clf_l_src_data)}
-                Train d (unl_trg):  {len(clf_l_trg_data)}
+                Train d (l_src):    {len(d_src_data)}
+                Train d (unl_trg):  {len(d_trg_data)}
                 Validation:         {len(valid_data)}
                 Test (unl_trg):     {len(test_data)}
                 Patience:           {config['main']['patience']}
@@ -450,7 +462,7 @@ def main(config_path: str):
 
             checkpoint_dir = (
                 f"{config['main']['result_dir']}checkpoints/"
-                + f"{config['main']['prefix']}_ADA_{config['main']['src_facility']}_{l_trg_selected_wsi}_{config['main']['classes']}/")
+                + f"{config['main']['prefix']}_{config['main']['src_facility']}_{l_trg_selected_wsi}_{config['main']['classes']}/")
             try:
                 os.mkdir(checkpoint_dir)
                 logging.info("Created checkpoint directory")

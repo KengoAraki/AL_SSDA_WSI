@@ -77,6 +77,9 @@ class WSIDataset_ST1_ADA2_ValT(WSIDataset):
     Adversarial Domain Adaptation用
     labeled sourceのWSIとsingle labeled target WSI, unlabeled target WSIを使用
     valid dataには複数枚のtarget WSIを使用
+    classification用のdataloaderとdiscriminator用のdataloaderは別々に用意
+        - classification用: class-balanced
+        - disriminator用: cluster-balanced
     """
 
     def __init__(
@@ -130,7 +133,7 @@ class WSIDataset_ST1_ADA2_ValT(WSIDataset):
         valid_files = self.trg_valid_files
         test_files = self.unl_trg_files  # unl_trgがtest対象
 
-        self.data_len = len(train_files) + len(valid_files)
+        # self.data_len = len(train_files) + len(valid_files)
         print(f"[wsi (source)]  train: (l) {len(self.l_src_wsis)}")
         print(
             f"[wsi (target)]  train: (l) 1, (unl) {len(self.unl_trg_wsis)}, valid: {len(self.trg_valid_wsis)}"
@@ -143,7 +146,7 @@ class WSIDataset_ST1_ADA2_ValT(WSIDataset):
             f"[patch (target)] train: (l) {len(self.l_trg_files)}, (unl) {len(self.unl_trg_files)}, valid: {len(self.trg_valid_files)}"
         )
         print(
-            f"[patch (all)] train: {len(train_files)}, valid: {len(self.trg_valid_files)}"
+            f"[patch (all)] train: {len(train_files)}, valid: {len(valid_files)}"
         )
         print("test data: unl_trg")
 
