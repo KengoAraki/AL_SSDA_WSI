@@ -8,6 +8,7 @@ import torchvision
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from S.dataset import WSI
+from ST_ADA2.dataset import WSI_cluster
 
 
 def fix_seed(seed):
@@ -179,6 +180,8 @@ class ImbalancedDatasetSampler(torch.utils.data.sampler.Sampler):
             return dataset.dataset.imgs[idx][1]
         elif isinstance(dataset, WSI):
             return dataset[idx]["label"].item()
+        elif isinstance(dataset, WSI_cluster):
+            return dataset[idx]["cluster_id"].item()
         else:
             raise NotImplementedError
 
