@@ -12,9 +12,9 @@ l_src: labeled source, l_trg: labeled target, unl_trg: unlabeled target
 
 
 ## ST_ADAからの改善点
-1. D_lossの計算には，unl_trgを使用しない．l_src:l_trgを1:1の割合で使用．
+1. D_lossの計算には，unl_trgを使用しない．l_src:unl_trgを1:1の割合で使用．
 
-2. D_lossの計算には，l_src, l_trgを"クラスターバランシング"　→ D_loss用に別途Dataloaderを用意
+2. D_lossの計算には，l_src, unl_trgを"クラスターバランシング"　→ D_loss用に別途Dataloaderを用意
 
 3. batchサイズを大きくするために，RTX3090上で学習
 
