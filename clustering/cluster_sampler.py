@@ -90,6 +90,7 @@ def get_cluster_ids(
     latent_vecs = latent_vecs.numpy()
 
     # # 保存
+    # import numpy as np
     # np.save(
     #     "latent_vecs",
     #     latent_vecs,
@@ -113,3 +114,45 @@ def get_cluster_ids(
     print(dict(c_list))
 
     return cluster_ids
+
+
+# RTX3090のPC用 (PCAが実行できなかったため)
+def kmeans_cluster_ids(
+    latent_vecs,
+    cluster_num: int = 10,
+    random_state: int = 0,
+):
+    # latent_vecsの標準化と次元削減
+    feature_vecs = preprocess_feature_vecs(
+        latent_vecs,
+        reduced_dim=30,
+        random_state=random_state,
+        standarize=False,
+    )
+
+    # KMeansでクラスタリング
+    kmeans = KMeans(n_clusters=cluster_num, random_state=random_state)
+    clusters = kmeans.fit(feature_vecs)
+    cluster_ids = clusters.labels_
+    cluster_ids = cluster_ids.tolist()
+
+    c_list = sorted(Counter(cluster_ids).items(), key=lambda x: x[0])
+    print(dict(c_list))
+
+    return cluster_ids
+
+
+if __name__ == "__main__":
+    import numpy as np
+    import joblib
+
+    main_dir = "/home/kengoaraki/Downloads/latent_vecs_dir_ADDA2/"
+
+    src_vecs = np.load(main_dir + "l_src_latent_vecs.npy")
+    trg_vecs = np.load(main_dir + "unl_trg_latent_vecs.npy")
+
+    src_cluster_ids = kmeans_cluster_ids(src_vecs)
+    trg_cluster_ids = kmeans_cluster_ids(trg_vecs)
+
+    joblib.dump(src_cluster_ids, main_dir + "l_src_cluster_ids.jb", compress=3)
+    joblib.dump(trg_cluster_ids, main_dir + "unl_trg_cluster_ids.jb", compress=3)
