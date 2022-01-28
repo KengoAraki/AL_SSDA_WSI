@@ -154,23 +154,6 @@ class WSIDataset_ST1_ADA2_ValT(WSIDataset):
         self.clf_l_src_data = WSI(self.l_src_files, self.classes, self.shape, self.transform)
         self.clf_l_trg_data = WSI(self.l_trg_files, self.classes, self.shape, self.transform)
 
-        # discriminator用 (clusterラベルあり)
-        # srcはl_src, trgはunl_trg
-        # l_src_num, unl_trg_num = len(self.l_src_files), len(self.unl_trg_files)
-        # d_files = self.l_src_files + self.unl_trg_files
-        # d_cluster_ids = get_cluster_ids(
-        #     file_list=d_files,
-        #     weight_path=weight_path,
-        #     cluster_num=cluster_num,
-        #     batch_size=batch_size,
-        #     shape=shape,
-        #     classes=classes,
-        # )
-        # self.src_cluster_ids = d_cluster_ids[:l_src_num]
-        # self.trg_cluster_ids = d_cluster_ids[l_src_num:]
-        # assert len(self.src_cluster_id_list) == l_src_num, "length of l_src_num & src_cluster_ids does not match"
-        # assert len(self.trg_cluster_id_list) == unl_trg_num, "length of unl_trg_num & trg_cluster_ids does not match"
-
         print("get src_cluster_ids...")
         self.src_cluster_ids = get_cluster_ids(
             file_list=self.l_src_files,
