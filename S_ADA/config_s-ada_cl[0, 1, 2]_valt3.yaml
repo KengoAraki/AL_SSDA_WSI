@@ -30,11 +30,11 @@ dataset:
 
 test:
   output_dir: "/mnt/secssd/AL_SSDA_WSI_strage/s_ada_result/test/"
-  weight_dir: "/mnt/secssd/AL_SSDA_WSI_strage/s_ada_result/checkpoints/s-ada_valt3_ADA_MF0012_03_G144_[0, 1, 2]/"
-  # weight_names:
-    # - "cv0_E_epoch003.pth"
-    # - "cv1_E_epoch012.pth"
-    # - "cv2_E_epoch022.pth"
-    # - "cv3_E_epoch029.pth"
-    # - "cv4_E_epoch001.pth"
+  weight_dir: "/mnt/secssd/AL_SSDA_WSI_strage/s_ada_result/checkpoints/s-ada_valt3_ADA_MF0012_[0, 1, 2]/"
+  weight_names:
+    - "cv0_E_epoch001.pth"
+    - "cv1_E_epoch006.pth"
+    - "cv2_E_epoch001.pth"
+    - "cv3_E_epoch002.pth"
+    - "cv4_E_epoch005.pth"
   

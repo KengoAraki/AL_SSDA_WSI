@@ -39,13 +39,13 @@ dataset:
 test:
   output_dir: "/mnt/secssd/AL_SSDA_WSI_strage/st_ada_result/test/"
   weight_dir:
-  #   03_G144:
-  #     "/mnt/secssd/AL_SSDA_WSI_strage/st_ada_result/checkpoints/st1-ada_valt3_ADA_MF0012_03_G144_[0, 1, 2]/"
-  # weight_names:
-  #   03_G144: 
-  #     - "cv0_E_epoch002.pth"
-  #     - "cv1_E_epoch002.pth"
-  #     - "cv2_E_epoch005.pth"
-  #     - "cv3_E_epoch004.pth"
-  #     - "cv4_E_epoch001.pth"
+    03_G144:
+      "/mnt/secssd/AL_SSDA_WSI_strage/st_ada_result/checkpoints/st1-ada_valt3_clf-imbalance_ADA_MF0012_03_G144_[0, 1, 2]/"
+  weight_names:
+    03_G144: 
+      - "cv0_E_epoch003.pth"
+      - "cv1_E_epoch008.pth"
+      - "cv2_E_epoch008.pth"
+      - "cv3_E_epoch003.pth"
+      - "cv4_E_epoch012.pth"
   

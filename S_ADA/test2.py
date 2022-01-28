@@ -28,7 +28,6 @@ def main_trg(config_path: str, test_set: str = "trg_unl"):
         + f"{config['main']['prefix']}_{config['main']['src_facility']}_{config['main']['classes']}/")
     if os.path.exists(output_dir) is False:
         os.mkdir(output_dir)
-        logging.info("Create output directory")
 
     weight_list = [
         config['test']['weight_dir'] + name
@@ -143,7 +142,7 @@ def main_trg(config_path: str, test_set: str = "trg_unl"):
     cl_labels = ["Non-\nNeop.", "LSIL", "HSIL"]
 
     # Not-Normalized
-    cm_plt = plot_confusion_matrix(cm, cl_labels, normalize=False, font_size=25, rotation=rotation)
+    cm_plt = plot_confusion_matrix(cm_all, cl_labels, normalize=False, font_size=25, rotation=rotation)
     cm_plt.savefig(
         output_dir
         + project
@@ -153,7 +152,7 @@ def main_trg(config_path: str, test_set: str = "trg_unl"):
     plt.close()
 
     # Normalized
-    cm_plt = plot_confusion_matrix(cm, cl_labels, normalize=True, font_size=35, rotation=rotation)
+    cm_plt = plot_confusion_matrix(cm_all, cl_labels, normalize=True, font_size=35, rotation=rotation)
     cm_plt.savefig(
         output_dir
         + project
@@ -167,10 +166,11 @@ if __name__ == "__main__":
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
-    # config_path = "./S_ADA/config_s-ada_cl[0, 1, 2]_valt3.yaml"
     # config_path = "../S_ADA/config_s-ada_cl[0, 1, 2]_valt3.yaml"
+    # config_path = "../S_ADA/config_s-ada_cl[0, 1, 2]_valt3_unl-trg-balance.yaml"
+    # main_trg(config_path=config_path, test_set="trg_unl")
 
-    # config_path = "./S_ADA/config_s-ada_cl[0, 1, 2]_valt3_unl-trg-balance.yaml"
-    config_path = "../S_ADA/config_s-ada_cl[0, 1, 2]_valt3_unl-trg-balance.yaml"
-
+    # config_path = "../S_ADA/config_s-ada_cl[0, 1, 2]_valt3_unl-trg-balance.yaml"
+    # main_trg(config_path=config_path, test_set="trg_unl")
+    config_path = "../S_ADA/config_s-ada_cl[0, 1, 2]_valt3.yaml"
     main_trg(config_path=config_path, test_set="trg_unl")

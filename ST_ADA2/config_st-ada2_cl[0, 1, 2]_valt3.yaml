@@ -41,12 +41,12 @@ test:
   output_dir: "/mnt/secssd/AL_SSDA_WSI_strage/st_ada2_result/test/"
   weight_dir:
     03_G144:
-      "/mnt/secssd/AL_SSDA_WSI_strage/st_ada2_result/checkpoints/st1-ada_valt3_ADA_MF0012_03_G144_[0, 1, 2]/"
+      "/mnt/secssd/AL_SSDA_WSI_strage/st_ada2_result/checkpoints/st1-ada2_valt3_MF0012_03_G144_[0, 1, 2]/"
   weight_names:
     03_G144: 
-      - "cv0_E_epoch002.pth"
-      - "cv1_E_epoch002.pth"
-      - "cv2_E_epoch005.pth"
-      - "cv3_E_epoch004.pth"
-      - "cv4_E_epoch001.pth"
+      - "cv0_E_epoch009.pth"
+      - "cv1_E_epoch007.pth"
+      - "cv2_E_epoch006.pth"
+      - "cv3_E_epoch001.pth"
+      - "cv4_E_epoch002.pth"
   

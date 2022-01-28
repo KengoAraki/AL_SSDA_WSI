@@ -10,11 +10,10 @@ import torch.nn as nn
 import matplotlib.pyplot as plt
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-from S.eval import eval_metrics, plot_confusion_matrix
+from S.eval import eval_net_test, eval_metrics, plot_confusion_matrix
 from S.dataset import WSI, get_files
 from S.util import fix_seed
-from ST_ADA.model import Encoder
-from ST_ADA.eval import eval_net_test
+from S.model import build_model
 
 
 def test_net(
@@ -50,6 +49,7 @@ def test_net(
         loader,
         criterion,
         device,
+        save_dir=output_dir,
     )
 
     logging.info(
@@ -92,7 +92,6 @@ def test_net(
     )
     plt.clf()
     plt.close()
-
     return cm
 
 
@@ -156,12 +155,12 @@ def main_trg(trg_l_wsi: str, config_path: str, test_set: str = "trg_unl"):
         )
         # ------------- #
 
-        net = Encoder(
-            encoder_name=config['main']['model'],
-            num_classes=len(config['main']['classes']),
-            pretrained=False, weight_path=None, device=device
-        ).to(device)
+        net = build_model(
+            config['main']['model'], num_classes=len(config['main']['classes'])
+        )
         logging.info("Loading model {}".format(weight_path))
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        net.to(device=device)
         net.load_state_dict(torch.load(weight_path, map_location=device))
 
         cm = test_net(
@@ -245,17 +244,11 @@ def main_trg(trg_l_wsi: str, config_path: str, test_set: str = "trg_unl"):
 
 if __name__ == "__main__":
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
-    # config_path = "./ST_ADA/config_st-ada_cl[0, 1, 2]_valt3.yaml"
-    config_path = "../ST_ADA/config_st-ada_cl[0, 1, 2]_valt3.yaml"
+    # config_path = "./ST_TL/config_st_tl_cl[0, 1, 2]_valt3.yaml"
+    config_path = "../ST_TL/config_st_tl_cl[0, 1, 2]_valt3.yaml"
 
-    # config_path = "../ST_ADA/config_st-ada_cl[0, 1, 2]_valt3_unl-trg-balance.yaml"
-    # main_trg(trg_l_wsi='03_G144', config_path=config_path, test_set="trg_unl")
-
-    config_path = "../ST_ADA/config_st-ada_cl[0, 1, 2]_valt3.yaml"
     main_trg(trg_l_wsi='03_G144', config_path=config_path, test_set="trg_unl")
-    config_path = "../ST_ADA/config_st-ada_cl[0, 1, 2]_valt3_unl-trg-balance.yaml"
-    main_trg(trg_l_wsi='03_G144', config_path=config_path, test_set="trg_unl")
-    config_path = "../ST_ADA/config_st-ada_cl[0, 1, 2]_valt3_clf-imbalance.yaml"
-    main_trg(trg_l_wsi='03_G144', config_path=config_path, test_set="trg_unl")
+    main_trg(trg_l_wsi='03_G293', config_path=config_path, test_set="trg_unl")
+    main_trg(trg_l_wsi='03_G109-1', config_path=config_path, test_set="trg_unl")
