@@ -69,6 +69,7 @@ def test_net(
     )
     logging.info(f"\n Recall ({test_set}):    {val_metrics['recall']}")
     logging.info(f"\n F1 ({test_set}):        {val_metrics['f1']}")
+    logging.info(f"\n Dice ({test_set}):      {val_metrics['dice']}")
     logging.info(f"\n mIoU ({test_set}):      {val_metrics['mIoU']}")
 
     # Not-Normalized
