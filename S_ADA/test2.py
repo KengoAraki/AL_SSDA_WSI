@@ -164,7 +164,7 @@ def main_trg(config_path: str, test_set: str = "trg_unl"):
 
 if __name__ == "__main__":
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
     # config_path = "../S_ADA/config_s-ada_cl[0, 1, 2]_valt3.yaml"
     # config_path = "../S_ADA/config_s-ada_cl[0, 1, 2]_valt3_unl-trg-balance.yaml"
@@ -172,5 +172,5 @@ if __name__ == "__main__":
 
     # config_path = "../S_ADA/config_s-ada_cl[0, 1, 2]_valt3_unl-trg-balance.yaml"
     # main_trg(config_path=config_path, test_set="trg_unl")
-    config_path = "../S_ADA/config_s-ada_cl[0, 1, 2]_valt3.yaml"
+    config_path = "../S_ADA/config_s-ada_cl[0, 1, 2]_valt3_dsampler_equal.yaml"
     main_trg(config_path=config_path, test_set="trg_unl")
