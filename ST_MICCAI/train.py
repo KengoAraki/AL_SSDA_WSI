@@ -81,7 +81,7 @@ def train_net(
     elif mode == "max":
         best_model_info = {"epoch": 0, "val": float("-inf")}
 
-    n_train = len(src_train_loader)
+    n_train_smps = min(len(src_train_loader), len(trg_train_loader))
     for epoch in range(epochs):
         net.train()
 
@@ -111,7 +111,7 @@ def train_net(
                 loss.backward()
                 nn.utils.clip_grad_value_(net.parameters(), 0.1)
                 optimizer.step()
-                
+
                 pbar.update(1)
 
         # calculate validation loss and confusion matrix
@@ -177,6 +177,7 @@ def train_net(
 
     if writer is not None:
         writer.close()
+
 
 # source + 1枚のtargetで学習
 def main(config_path: str, l_trg_set: str = 'top'):
@@ -325,11 +326,11 @@ if __name__ == "__main__":
 
     config_path = "../ST_MICCAI/config_st_cl[0, 1, 2]_valt20_pretrained.yaml"
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-    main(config_path=config_path, l_trg_set='top')
+    # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    # main(config_path=config_path, l_trg_set='top')
 
     # os.environ["CUDA_VISIBLE_DEVICES"] = "1"
     # main(config_path=config_path, l_trg_set='med')
 
-    # os.environ["CUDA_VISIBLE_DEVICES"] = "2"
-    # main(config_path=config_path, l_trg_set='btm')
+    os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+    main(config_path=config_path, l_trg_set='btm')
