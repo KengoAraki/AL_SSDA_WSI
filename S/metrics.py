@@ -68,6 +68,14 @@ class evalMet(object):
         f1 = 2 * (precision * recall) / (precision + recall)
         return f1
 
+    def Dice(self, cm):  # F1と実質同じ
+        len_label = len(cm)
+        dice = 0
+        for idx in range(len_label):
+            inter = cm[idx][idx]
+            dice += (inter * 2) / (np.sum(cm[idx, :]) + np.sum(cm[:, idx]))
+        return dice / len_label
+
     def mIoU(self, cm):
         len_label = len(cm)
         iou = 0

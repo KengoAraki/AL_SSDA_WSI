@@ -132,11 +132,12 @@ def eval_net_test(net, loader, criterion, device, get_miss=False, save_dir=None)
 
 def eval_metrics(cm):
     Met = evalMet()
-    met_val = {"accuracy": 0, "precision": 0, "recall": 0, "f1": 0, "mIoU": 0}
+    met_val = {"accuracy": 0, "precision": 0, "recall": 0, "f1": 0, "dice": 0, "mIoU": 0}
     met_val["accuracy"] = Met.Accuracy(cm)
     met_val["precision"] = Met.Precision(cm)
     met_val["recall"] = Met.Recall(cm)
     met_val["f1"] = Met.F1(cm)
+    met_val["dice"] = Met.Dice(cm)
     met_val["mIoU"] = Met.mIoU(cm)
     return met_val
 
