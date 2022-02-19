@@ -2,6 +2,8 @@ S/__pycache__/
 ST/__pycache__/
 ST_TL/__pycache__/
 S_ADA/__pycache__/
+S_ADDA/__pycache__/
+S_ADDA2/__pycache__/
 ST_ADA/__pycache__/
 ST_ADA2/__pycache__/
 ST_ADDA2/__pycache__/
@@ -13,3 +15,5 @@ clustering/__pycache__/
 ipynb/input_predmap/
 ipynb/output/
 ipynb/output_predmap/
+
+analysis/patch_class_ratio/
