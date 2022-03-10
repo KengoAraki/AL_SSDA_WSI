@@ -15,7 +15,7 @@ from visualyze.utils import edgecolor, imscatter, colors_domains, markers
 
 def get_embed_feature(x, method: str):
     def tsne_embed(x):
-        tsne = TSNE(n_components=2, random_state=0, perplexity=30)
+        tsne = TSNE(n_components=2, random_state=0, perplexity=30, n_jobs=8)
         x_embedded = tsne.fit_transform(x)
         return x_embedded
 

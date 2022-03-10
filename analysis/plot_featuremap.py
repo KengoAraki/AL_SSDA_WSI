@@ -137,7 +137,7 @@ def main(config_path: str):
                 output_dir=None
             )
             trg_l_vecs_list = get_latent_vecs_list(
-                model, wsi_list=trg_l_wsis,
+                model, wsi_list=[trg_l_selected_wsi],
                 imgs_dir=config['dataset']['trg_imgs_dir'],
                 sample_N=args.sample_N,
                 classes=config['main']['classes'],

@@ -16,7 +16,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from ST.dataset import WSIDatasetST1_ValT
 from S.train import early_stop, update_best_model
 from S.eval import eval_net, plot_confusion_matrix, convert_plt2nd, eval_metrics
-from S.util import fix_seed, ImbalancedDatasetSampler, select_optim
+from S.util import fix_seed, ImbalancedDatasetSampler, ImbalancedDatasetSampler2, select_optim
 from S.model import build_model
 
 
@@ -42,21 +42,21 @@ def train_net(
 
     src_train_loader = DataLoader(
         src_train_data,
-        sampler=ImbalancedDatasetSampler(src_train_data),
+        sampler=ImbalancedDatasetSampler2(src_train_data),
         batch_size=batch_size,
         shuffle=False,
         num_workers=2,
         pin_memory=True,
-        drop_last=True,
+        drop_last=False,
     )
     trg_train_loader = DataLoader(
         trg_train_data,
-        sampler=ImbalancedDatasetSampler(trg_train_data),
+        sampler=ImbalancedDatasetSampler2(trg_train_data),
         batch_size=batch_size,
         shuffle=False,
         num_workers=2,
         pin_memory=True,
-        drop_last=True,
+        drop_last=False,
     )
     val_loader = DataLoader(
         valid_data,
@@ -81,7 +81,7 @@ def train_net(
     elif mode == "max":
         best_model_info = {"epoch": 0, "val": float("-inf")}
 
-    n_train_smps = min(len(src_train_loader), len(trg_train_loader))
+    n_train = min(len(src_train_loader), len(trg_train_loader))
     for epoch in range(epochs):
         net.train()
 
@@ -324,7 +324,8 @@ if __name__ == "__main__":
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
-    config_path = "../ST_MICCAI/config_st_cl[0, 1, 2]_valt20_pretrained.yaml"
+    # config_path = "../ST_MICCAI/config_st_cl[0, 1, 2]_valt20_pretrained.yaml"
+    config_path = "../ST_MICCAI/config_st_cl[0, 1, 2]_valt20_srcMF0003_pretrained.yaml"
 
     # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     # main(config_path=config_path, l_trg_set='top')

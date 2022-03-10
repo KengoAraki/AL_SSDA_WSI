@@ -134,6 +134,7 @@ def main_trg(config_path: str, test_set: str = "trg_unl"):
     )
     logging.info(f"\n Recall ({test_set}):    {val_metrics['recall']}")
     logging.info(f"\n F1 ({test_set}):        {val_metrics['f1']}")
+    logging.info(f"\n Dice ({test_set}):      {val_metrics['dice']}")
     logging.info(f"\n mIoU ({test_set}):      {val_metrics['mIoU']}")
 
     # 軸入れ替え
@@ -166,11 +167,5 @@ if __name__ == "__main__":
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
-    # config_path = "../S_ADA/config_s-ada_cl[0, 1, 2]_valt3.yaml"
-    # config_path = "../S_ADA/config_s-ada_cl[0, 1, 2]_valt3_unl-trg-balance.yaml"
-    # main_trg(config_path=config_path, test_set="trg_unl")
-
-    # config_path = "../S_ADA/config_s-ada_cl[0, 1, 2]_valt3_unl-trg-balance.yaml"
-    # main_trg(config_path=config_path, test_set="trg_unl")
-    config_path = "../S_ADA/config_s-ada_cl[0, 1, 2]_valt3_dsampler_equal.yaml"
+    config_path = "../S_ADA/config_s-ada_cl[0, 1, 2]_valt20_dsampler_equal_miccai.yaml"
     main_trg(config_path=config_path, test_set="trg_unl")

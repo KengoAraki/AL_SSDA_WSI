@@ -66,6 +66,7 @@ def tensorboard_logging(
         writer.add_scalar(f'Precision (l)/{mode}', l_metrics['precision'], epoch)
         writer.add_scalar(f'Recall (l)/{mode}', l_metrics['recall'], epoch)
         writer.add_scalar(f'mIoU (l)/{mode}', l_metrics['mIoU'], epoch)
+        writer.add_scalar(f'Dice (l)/{mode}', l_metrics['dice'], epoch)
         writer.add_scalar(f'F1 (l)/{mode}', l_metrics['f1'], epoch)
 
     if unl_cm is not None:
@@ -76,6 +77,7 @@ def tensorboard_logging(
         writer.add_scalar(f'Precision (unl)/{mode}', unl_metrics['precision'], epoch)
         writer.add_scalar(f'Recall (unl)/{mode}', unl_metrics['recall'], epoch)
         writer.add_scalar(f'mIoU (unl)/{mode}', unl_metrics['mIoU'], epoch)
+        writer.add_scalar(f'Dice (unl)/{mode}', unl_metrics['dice'], epoch)
         writer.add_scalar(f'F1 (unl)/{mode}', unl_metrics['f1'], epoch)
 
     if d_cm is not None:
@@ -87,6 +89,7 @@ def tensorboard_logging(
         writer.add_scalar(f'Precision (Discriminator)/{mode}', d_val_metrics['precision'], epoch)
         writer.add_scalar(f'Recall (Discriminator)/{mode}', d_val_metrics['recall'], epoch)
         writer.add_scalar(f'mIoU (Discriminator)/{mode}', d_val_metrics['mIoU'], epoch)
+        writer.add_scalar(f'Dice (Discriminator)/{mode}', d_val_metrics['dice'], epoch)
         writer.add_scalar(f'F1 (Discriminator)/{mode}', d_val_metrics['f1'], epoch)
 
     return writer

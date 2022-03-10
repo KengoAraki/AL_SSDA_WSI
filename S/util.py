@@ -193,3 +193,66 @@ class ImbalancedDatasetSampler(torch.utils.data.sampler.Sampler):
 
     def __len__(self):
         return self.num_samples
+
+
+class ImbalancedDatasetSampler2(torch.utils.data.sampler.Sampler):
+    """Samples elements randomly from a given list of indices for imbalanced dataset
+    https://github.com/ufoym/imbalanced-dataset-sampler/blob/master/torchsampler/imbalanced.py
+    Arguments:
+        indices (list, optional): a list of indices
+        num_samples (int, optional): number of samples to draw
+        callback_get_label func: a callback-like function which takes two arguments - dataset and index
+    """
+
+    def __init__(
+        self, dataset, indices=None, num_samples=None, callback_get_label=None
+    ):
+
+        # if indices is not provided,
+        # all elements in the dataset will be considered
+        self.indices = list(range(len(dataset))) if indices is None else indices
+
+        # define custom callback
+        self.callback_get_label = callback_get_label
+
+        # if num_samples is not provided,
+        # draw `len(indices)` samples in each iteration
+        self.num_samples = len(self.indices) if num_samples is None else num_samples
+
+        # distribution of classes in the dataset
+        class_labels = [self._get_label(dataset, idx).tolist() for idx in range(len(dataset))]
+        u, b = np.unique(class_labels, return_counts=True)
+        label_to_count = {}
+        for uu, bb in zip(u, b):
+            label_to_count[uu] = bb
+
+        # weight for each sample
+        weights = [
+            1.0 / label_to_count[c] for c in class_labels
+        ]
+        self.weights = torch.DoubleTensor(weights)
+
+    def _get_label(self, dataset, idx):
+        if self.callback_get_label:
+            return self.callback_get_label(dataset, idx)
+        elif isinstance(dataset, torchvision.datasets.MNIST):
+            return dataset.train_labels[idx].item()
+        elif isinstance(dataset, torchvision.datasets.ImageFolder):
+            return dataset.imgs[idx][1]
+        elif isinstance(dataset, torch.utils.data.Subset):
+            return dataset.dataset.imgs[idx][1]
+        elif isinstance(dataset, WSI):
+            return dataset.get_label(dataset.file_list[idx])
+        elif isinstance(dataset, WSI_cluster):
+            return dataset[idx]["cluster_id"].item()
+        else:
+            raise NotImplementedError
+
+    def __iter__(self):
+        return (
+            self.indices[i]
+            for i in torch.multinomial(self.weights, self.num_samples, replacement=True)
+        )
+
+    def __len__(self):
+        return self.num_samples

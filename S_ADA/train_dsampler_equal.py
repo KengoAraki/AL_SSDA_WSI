@@ -15,7 +15,7 @@ import copy
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from S.eval import eval_metrics
 from S.train import update_best_model, early_stop
-from S.util import fix_seed, ImbalancedDatasetSampler, select_optim
+from S.util import fix_seed, ImbalancedDatasetSampler, ImbalancedDatasetSampler2, select_optim
 from ST_ADA.model import Encoder, Discriminator
 from ST_ADA.eval import eval_net_train, eval_net_trg_val, tensorboard_logging
 from S_ADA.dataset import WSIDataset_S_ADA_ValT
@@ -48,7 +48,7 @@ def train_net(
 
     l_src_train_loader = DataLoader(
         l_src_train_data,
-        sampler=ImbalancedDatasetSampler(l_src_train_data),
+        sampler=ImbalancedDatasetSampler2(l_src_train_data),
         batch_size=batch_size,
         shuffle=False,
         num_workers=2,
@@ -245,6 +245,7 @@ def train_net(
         logging.info("\n Acc    (valid, epoch): {}".format(val_metrics['accuracy']))
         logging.info("\n Prec   (valid, epoch): {}".format(val_metrics['precision']))
         logging.info("\n Recall (valid, epoch): {}".format(val_metrics['recall']))
+        logging.info("\n Dice   (valid, epoch): {}".format(val_metrics['dice']))
         logging.info("\n mIoU   (valid, epoch): {}".format(val_metrics['mIoU']))
 
         # calculate unlabeled target loss and confusion matrix (for test)
@@ -466,8 +467,10 @@ def main(config_path: str):
 
 if __name__ == "__main__":
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
-    config_path = "../S_ADA/config_s-ada_cl[0, 1, 2]_valt3_dsampler_equal.yaml"
+    # config_path = "../S_ADA/config_s-ada_cl[0, 1, 2]_valt3_dsampler_equal.yaml"
     # config_path = "./S_ADA/config_s-ada_cl[0, 1, 2]_valt3_dsampler_equal.yaml"
+
+    config_path = "../S_ADA/config_s-ada_cl[0, 1, 2]_valt20_dsampler_equal_miccai.yaml"
     main(config_path=config_path)

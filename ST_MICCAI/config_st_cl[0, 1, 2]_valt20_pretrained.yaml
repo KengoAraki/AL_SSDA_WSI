@@ -29,29 +29,98 @@ dataset:
 
 test:
   output_dir: "/mnt/secssd/AL_SSDA_WSI_MICCAI_strage/st_pretrained_result/test/"
-  # weight_dir:
-  #   03_G144:
-  #     "/mnt/secssd/AL_SSDA_WSI_MICCAI_strage/st_pretrained_result/checkpoints/st1_valt3_pretrained_MF0012_03_G144_[0, 1, 2]/"
-  #   03_G293:
-  #     "/mnt/secssd/AL_SSDA_WSI_MICCAI_strage/st_pretrained_result/checkpoints/st1_valt3_pretrained_MF0012_03_G293_[0, 1, 2]/"
-  #   03_G109-1:
-  #     "/mnt/secssd/AL_SSDA_WSI_MICCAI_strage/st_pretrained_result/checkpoints/st1_valt3_pretrained_MF0012_03_G109-1_[0, 1, 2]/"
-  # weight_names:
-  #   03_G144: 
-  #     - "cv0_epoch12.pth"
-  #     - "cv1_epoch3.pth"
-  #     - "cv2_epoch2.pth"
-  #     - "cv3_epoch15.pth"
-  #     - "cv4_epoch3.pth"
-  #   03_G293: 
-  #     - "cv0_epoch2.pth"
-  #     - "cv1_epoch3.pth"
-  #     - "cv2_epoch2.pth"
-  #     - "cv3_epoch3.pth"
-  #     - "cv4_epoch7.pth"
-  #   03_G109-1: 
-  #     - "cv0_epoch4.pth"
-  #     - "cv1_epoch2.pth"
-  #     - "cv2_epoch7.pth"
-  #     - "cv3_epoch5.pth"
-  #     - "cv4_epoch5.pth"
+  weight_dir: "/mnt/secssd/AL_SSDA_WSI_MICCAI_strage/st_pretrained_result/checkpoints/"
+  weight_names:
+    top:
+      03_G144: 
+        - "cv0_epoch11.pth"
+        - "cv1_epoch1.pth"
+        - "cv2_epoch1.pth"
+        - "cv3_epoch9.pth"
+        - "cv4_epoch9.pth"
+      03_G34: 
+        - "cv0_epoch3.pth"
+        - "cv1_epoch1.pth"
+        - "cv2_epoch5.pth"
+        - "cv3_epoch3.pth"
+        - "cv4_epoch3.pth"
+      03_G139-1:
+        - "cv0_epoch5.pth"
+        - "cv1_epoch1.pth"
+        - "cv2_epoch2.pth"
+        - "cv3_epoch2.pth"
+        - "cv4_epoch1.pth"
+      03_G170:
+        - "cv0_epoch8.pth"
+        - "cv1_epoch4.pth"
+        - "cv2_epoch9.pth"
+        - "cv3_epoch4.pth"
+        - "cv4_epoch6.pth"
+      03_G180:
+        - "cv0_epoch2.pth"
+        - "cv1_epoch4.pth"
+        - "cv2_epoch5.pth"
+        - "cv3_epoch5.pth"
+        - "cv4_epoch3.pth"
+    med:
+      03_G212:
+        - "cv0_epoch6.pth"
+        - "cv1_epoch1.pth"
+        - "cv2_epoch3.pth"
+        - "cv3_epoch8.pth"
+        - "cv4_epoch7.pth"
+      03_G293:
+        - "cv0_epoch3.pth"
+        - "cv1_epoch1.pth"
+        - "cv2_epoch1.pth"
+        - "cv3_epoch2.pth"
+        - "cv4_epoch2.pth"
+      03_G177:
+        - "cv0_epoch2.pth"
+        - "cv1_epoch17.pth"
+        - "cv2_epoch6.pth"
+        - "cv3_epoch14.pth"
+        - "cv4_epoch1.pth"
+      03_G95:
+        - "cv0_epoch10.pth"
+        - "cv1_epoch1.pth"
+        - "cv2_epoch8.pth"
+        - "cv3_epoch2.pth"
+        - "cv4_epoch2.pth"
+      03_G148:
+        - "cv0_epoch2.pth"
+        - "cv1_epoch7.pth"
+        - "cv2_epoch2.pth"
+        - "cv3_epoch2.pth"
+        - "cv4_epoch1.pth"
+    btm:
+      03_G204:
+        - "cv0_epoch1.pth"
+        - "cv1_epoch1.pth"
+        - "cv2_epoch6.pth"
+        - "cv3_epoch1.pth"
+        - "cv4_epoch1.pth"
+      03_G176:
+        - "cv0_epoch1.pth"
+        - "cv1_epoch9.pth"
+        - "cv2_epoch7.pth"
+        - "cv3_epoch3.pth"
+        - "cv4_epoch1.pth"
+      03_G58:
+        - "cv0_epoch9.pth"
+        - "cv1_epoch7.pth"
+        - "cv2_epoch1.pth"
+        - "cv3_epoch1.pth"
+        - "cv4_epoch4.pth"
+      03_G51:
+        - "cv0_epoch1.pth"
+        - "cv1_epoch5.pth"
+        - "cv2_epoch11.pth"
+        - "cv3_epoch4.pth"
+        - "cv4_epoch6.pth"
+      03_G109-1:
+        - "cv0_epoch5.pth"
+        - "cv1_epoch2.pth"
+        - "cv2_epoch4.pth"
+        - "cv3_epoch12.pth"
+        - "cv4_epoch6.pth"

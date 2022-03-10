@@ -1,0 +1,34 @@
+main:
+  prefix: "s"
+  classes: [0, 1, 2]
+  epochs: 100
+  batch_size: 32
+  model: "resnet50"
+  optim: "Adam"
+  shape: [256, 256]
+  patience: 5
+  stop_cond: "mIoU"
+  cv: 5
+  facility: "MF0003"
+  result_dir: "/mnt/secssd/AL_SSDA_WSI_MICCAI_srcMF0003_strage/s_result/"
+
+dataset:
+  imgs_dir: "/mnt/secssd/SSDA_Annot_WSI_strage/mnt2/MF0003/"
+  jb_dir: "/mnt/secssd/AL_SSDA_WSI_MICCAI_srcMF0003_strage/dataset/"
+
+
+test:
+  output_dir: "/mnt/secssd/AL_SSDA_WSI_MICCAI_srcMF0003_strage/s_result/test/"
+  weight_dir: "/mnt/secssd/AL_SSDA_WSI_MICCAI_srcMF0003_strage/s_result/checkpoints/s_MF0003_[0, 1, 2]/"
+  weight_names:
+    - "cv0_epoch6.pth"
+    - "cv1_epoch3.pth"
+    - "cv2_epoch2.pth"
+    - "cv3_epoch8.pth"
+    - "cv4_epoch9.pth"
+  # get_miss: False
+  # likelihood: False
+  src_facility: "MF0003"
+  src_imgs_dir: "/mnt/secssd/SSDA_Annot_WSI_strage/mnt2/MF0003/"
+  trg_facility: "MF0012"
+  trg_imgs_dir: "/mnt/secssd/SSDA_Annot_WSI_strage/mnt2/MF0012/"

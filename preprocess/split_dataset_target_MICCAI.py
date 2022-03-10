@@ -41,7 +41,7 @@ class SSDATargetDatasetCE(object):
 
         # ===== 実験条件を修論と揃えるため ===== #
         jb_dir = "/mnt/secssd/SSDA_Annot_WSI_strage/dataset/"
-        facility = "MF0003"
+        facility = "MF0012"
         cv_num = 0
         self.all_wsis = joblib.load(
             jb_dir + f"{facility}/" + f"cv{cv_num}_train_" + f"{facility}_wsi.jb"
@@ -53,6 +53,7 @@ class SSDATargetDatasetCE(object):
             jb_dir + f"{facility}/" + f"cv{cv_num}_test_" + f"{facility}_wsi.jb"
         )
         self.all_wsis = natsorted(self.all_wsis)
+        self.all_wsis = self.remove_zero_patch_wsi(self.all_wsis)
         # ============================== #
 
         self.trg_unl_wsis = copy.deepcopy(self.all_wsis)
@@ -104,6 +105,27 @@ class SSDATargetDatasetCE(object):
                 ]
             )
         return files_list
+
+    # self.sub_classesのパッチがないWSIをリストから除去
+    def remove_zero_patch_wsi(self, wsis):
+        re_pattern = re.compile('|'.join([f"/{i}/" for i in self.sub_classes]))
+
+        new_wsis = []
+        for wsi in wsis:
+            tmp_files = \
+                [
+                    p for p in glob.glob(self.imgs_dir + f"*/{wsi}_*/*.png", recursive=True)
+                    if bool(re_pattern.search(p))
+                ]
+            if len(tmp_files) > 0:
+                new_wsis.append(wsi)
+            else:
+                print(f"[{wsi}] does not have patch for {self.sub_classes}")
+
+        # 上のre_pattern
+        print(f"bf-remove: {len(wsis)}")
+        print(f"af-remove: {len(new_wsis)}")
+        return new_wsis
 
 
 def save_SSDA_target_dataset(
@@ -186,9 +208,14 @@ def get_l_trg_wsis(
 ):
     df = pd.read_csv(csv_path)
 
-    # sample_numが0のWSIを除去
+    # # sample_numが0のWSIを除去
+    # print(f"bf: {len(df)}")
+    # df = df[df['sample_num'] > 0]
+    # print(f"af: {len(df)}")
+
+    # sample_numが10以下のWSIはlabeled targetの対象外にする
     print(f"bf: {len(df)}")
-    df = df[df['sample_num'] > 0]
+    df = df[df['sample_num'] > 10]
     print(f"af: {len(df)}")
 
     df_sort = df.sort_values('entropy', ascending=False)  # cluster-entropyの大きい順にソート
@@ -216,9 +243,29 @@ if __name__ == "__main__":
         format='%(levelname)s: %(message)s'
     )
 
-    imgs_dir = "/mnt/secssd/SSDA_Annot_WSI_strage/mnt2/MF0003/"
-    output_dir = "/mnt/secssd/AL_SSDA_WSI_MICCAI_strage/dataset/MF0003/"
-    csv_path = "/home/kengoaraki/Project/DA/AL_SSDA_WSI/analysis/MF0003_cluster_entropy_all.csv"
+    # imgs_dir = "/mnt/secssd/SSDA_Annot_WSI_strage/mnt2/MF0003/"
+    # output_dir = "/mnt/secssd/AL_SSDA_WSI_MICCAI_strage/dataset/MF0003/"
+    # csv_path = "/home/kengoaraki/Project/DA/AL_SSDA_WSI/analysis/MF0003_cluster_entropy_all.csv"
+
+    # trg_l_top_wsis, trg_l_med_wsis, trg_l_btm_wsis = get_l_trg_wsis(csv_path)
+
+    # classes = [0, 1, 2]
+    # valid_wsi_num = 20
+
+    # save_SSDA_target_dataset(
+    #     trg_l_top_wsis=trg_l_top_wsis,
+    #     trg_l_med_wsis=trg_l_med_wsis,
+    #     trg_l_btm_wsis=trg_l_btm_wsis,
+    #     valid_wsi_num=valid_wsi_num,
+    #     classes=classes,
+    #     imgs_dir=imgs_dir,
+    #     output_dir=output_dir
+    # )
+
+
+    imgs_dir = "/mnt/secssd/SSDA_Annot_WSI_strage/mnt2/MF0012/"
+    output_dir = "/mnt/secssd/AL_SSDA_WSI_MICCAI_srcMF0003_strage/dataset/MF0012/"
+    csv_path = "/mnt/secssd/AL_SSDA_WSI_MICCAI_srcMF0003_strage/cluster_entropy/MF0012/MF0012_cluster_entropy.csv"
 
     trg_l_top_wsis, trg_l_med_wsis, trg_l_btm_wsis = get_l_trg_wsis(csv_path)
 
