@@ -296,5 +296,5 @@ if __name__ == "__main__":
     random.seed(args.random_state)
     np.random.seed(args.random_state)
 
-    # main(args)
-    main_distrib_cl(args)
+    main(args)
+    # main_distrib_cl(args)
